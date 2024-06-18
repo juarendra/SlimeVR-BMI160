@@ -1023,6 +1023,13 @@ Source: &lt;a href="http://www.rohm.com/web/global/datasheet/ESR01MZPF/esr-e"&gt
 <text x="-2.54" y="-5.08" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
 <pin name="+5V" x="0" y="-2.54" visible="off" length="short" direction="sup" rot="R90"/>
 </symbol>
+<symbol name="V+" urn="urn:adsk.eagle:symbol:26939/1" library_version="1">
+<wire x1="0.889" y1="-1.27" x2="0" y2="0.127" width="0.254" layer="94"/>
+<wire x1="0" y1="0.127" x2="-0.889" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="-0.889" y1="-1.27" x2="0.889" y2="-1.27" width="0.254" layer="94"/>
+<text x="-2.54" y="-2.54" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
+<pin name="V+" x="0" y="-2.54" visible="off" length="short" direction="sup" rot="R90"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="VCC" urn="urn:adsk.eagle:component:26957/1" prefix="P+" library_version="1">
@@ -1042,6 +1049,19 @@ Source: &lt;a href="http://www.rohm.com/web/global/datasheet/ESR01MZPF/esr-e"&gt
 <description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
 <gates>
 <gate name="1" symbol="+5V" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="V+" urn="urn:adsk.eagle:component:26966/1" prefix="P+" library_version="1">
+<description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="V+" x="0" y="0"/>
 </gates>
 <devices>
 <device name="">
@@ -3069,8 +3089,8 @@ By using any of these models, you agree that this information has been provided 
 <part name="P+5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 <part name="SUPPLY5" library="DecawaveLibrary" library_urn="urn:adsk.eagle:library:5224885" deviceset="3.3V" device=""/>
 <part name="GND5" library="DecawaveLibrary" library_urn="urn:adsk.eagle:library:5224885" deviceset="GND" device=""/>
-<part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="P+3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
+<part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="V+" device=""/>
+<part name="P+3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="V+" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -3141,9 +3161,9 @@ POSITRON ELEKTRONIK</text>
 <instance part="SUPPLY2" gate="G$1" x="120.142" y="101.092" smashed="yes" rot="R180">
 <attribute name="VALUE" x="122.682" y="101.092" size="1.016" layer="96" rot="R180" align="bottom-center"/>
 </instance>
-<instance part="LED" gate="G$1" x="120.142" y="102.87" smashed="yes" rot="R90">
-<attribute name="NAME" x="122.428" y="103.632" size="1.016" layer="95" rot="R90"/>
-<attribute name="VALUE" x="122.428" y="114.808" size="1.016" layer="96" rot="R90"/>
+<instance part="LED" gate="G$1" x="120.142" y="120.396" smashed="yes" rot="R270">
+<attribute name="NAME" x="121.412" y="119.888" size="1.016" layer="95" rot="R270"/>
+<attribute name="VALUE" x="121.158" y="108.458" size="1.016" layer="96" rot="R270"/>
 </instance>
 <instance part="Q1" gate="G$1" x="51.054" y="41.91" smashed="yes">
 <attribute name="NAME" x="64.77" y="38.862" size="1.016" layer="95" rot="R90" align="center-left"/>
@@ -3410,11 +3430,11 @@ POSITRON ELEKTRONIK</text>
 <instance part="GND5" gate="1" x="235.458" y="68.58" smashed="yes" rot="R270">
 <attribute name="VALUE" x="233.426" y="69.088" size="1.016" layer="96" align="top-center"/>
 </instance>
-<instance part="P+1" gate="VCC" x="144.018" y="62.992" smashed="yes">
-<attribute name="VALUE" x="145.288" y="64.516" size="1.016" layer="96" rot="R180"/>
+<instance part="P+1" gate="1" x="144.018" y="62.992" smashed="yes">
+<attribute name="VALUE" x="145.542" y="65.278" size="1.778" layer="96" rot="R180"/>
 </instance>
-<instance part="P+3" gate="VCC" x="150.622" y="98.806" smashed="yes" rot="R90">
-<attribute name="VALUE" x="149.098" y="100.076" size="1.016" layer="96" rot="R270"/>
+<instance part="P+3" gate="1" x="150.622" y="98.806" smashed="yes" rot="R90">
+<attribute name="VALUE" x="148.336" y="100.33" size="1.778" layer="96" rot="R270"/>
 </instance>
 </instances>
 <busses>
@@ -3729,23 +3749,6 @@ POSITRON ELEKTRONIK</text>
 <wire x1="77.724" y1="48.006" x2="75.184" y2="48.006" width="0.1524" layer="91"/>
 <pinref part="P+8" gate="VCC" pin="VCC"/>
 </segment>
-<segment>
-<pinref part="D1" gate="G$1" pin="K"/>
-<pinref part="C23" gate="G$1" pin="2"/>
-<wire x1="150.114" y1="54.864" x2="150.114" y2="59.436" width="0.1524" layer="91"/>
-<junction x="150.114" y="54.864"/>
-<pinref part="U6" gate="A" pin="S"/>
-<wire x1="140.716" y1="70.612" x2="140.716" y2="59.436" width="0.1524" layer="91"/>
-<wire x1="150.114" y1="59.436" x2="144.018" y2="59.436" width="0.1524" layer="91"/>
-<wire x1="144.018" y1="59.436" x2="140.716" y2="59.436" width="0.1524" layer="91"/>
-<wire x1="144.018" y1="60.452" x2="144.018" y2="59.436" width="0.1524" layer="91"/>
-<pinref part="P+1" gate="VCC" pin="VCC"/>
-</segment>
-<segment>
-<pinref part="BATT_SW" gate="G$1" pin="1"/>
-<wire x1="153.162" y1="98.806" x2="155.448" y2="98.806" width="0.1524" layer="91"/>
-<pinref part="P+3" gate="VCC" pin="VCC"/>
-</segment>
 </net>
 <net name="CBUS1" class="0">
 <segment>
@@ -3794,11 +3797,6 @@ POSITRON ELEKTRONIK</text>
 <junction x="95.504" y="120.904"/>
 </segment>
 <segment>
-<pinref part="LED" gate="G$1" pin="K"/>
-<pinref part="SUPPLY2" gate="G$1" pin="3.3V"/>
-<wire x1="120.142" y1="102.87" x2="120.142" y2="101.092" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="SUPPLY1" gate="G$1" pin="3.3V"/>
 <wire x1="220.218" y1="55.372" x2="222.758" y2="55.372" width="0.1524" layer="91"/>
 <wire x1="222.758" y1="55.372" x2="222.758" y2="56.388" width="0.1524" layer="91"/>
@@ -3827,6 +3825,11 @@ POSITRON ELEKTRONIK</text>
 <pinref part="EXT" gate="A" pin="4"/>
 <wire x1="240.03" y1="76.2" x2="237.998" y2="76.2" width="0.1524" layer="91"/>
 <pinref part="SUPPLY5" gate="G$1" pin="3.3V"/>
+</segment>
+<segment>
+<pinref part="LED" gate="G$1" pin="A"/>
+<pinref part="SUPPLY2" gate="G$1" pin="3.3V"/>
+<wire x1="120.142" y1="105.156" x2="120.142" y2="101.092" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$9" class="0">
@@ -4206,13 +4209,6 @@ POSITRON ELEKTRONIK</text>
 <junction x="72.566" y="138.18"/>
 </segment>
 </net>
-<net name="N$27" class="0">
-<segment>
-<pinref part="LED" gate="G$1" pin="A"/>
-<pinref part="R9" gate="G$1" pin="2"/>
-<wire x1="120.142" y1="118.11" x2="120.142" y2="121.412" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="EN" class="0">
 <segment>
 <pinref part="C14" gate="G$1" pin="P$1"/>
@@ -4312,6 +4308,32 @@ POSITRON ELEKTRONIK</text>
 <pinref part="R1" gate="G$1" pin="1"/>
 <wire x1="205.232" y1="42.164" x2="208.28" y2="42.164" width="0.1524" layer="91"/>
 <junction x="205.232" y="42.164"/>
+</segment>
+</net>
+<net name="V+" class="0">
+<segment>
+<pinref part="D1" gate="G$1" pin="K"/>
+<pinref part="C23" gate="G$1" pin="2"/>
+<wire x1="150.114" y1="54.864" x2="150.114" y2="59.436" width="0.1524" layer="91"/>
+<junction x="150.114" y="54.864"/>
+<pinref part="U6" gate="A" pin="S"/>
+<wire x1="140.716" y1="70.612" x2="140.716" y2="59.436" width="0.1524" layer="91"/>
+<wire x1="150.114" y1="59.436" x2="144.018" y2="59.436" width="0.1524" layer="91"/>
+<wire x1="144.018" y1="59.436" x2="140.716" y2="59.436" width="0.1524" layer="91"/>
+<wire x1="144.018" y1="60.452" x2="144.018" y2="59.436" width="0.1524" layer="91"/>
+<pinref part="P+1" gate="1" pin="V+"/>
+</segment>
+<segment>
+<pinref part="BATT_SW" gate="G$1" pin="1"/>
+<wire x1="153.162" y1="98.806" x2="155.448" y2="98.806" width="0.1524" layer="91"/>
+<pinref part="P+3" gate="1" pin="V+"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
+<pinref part="R9" gate="G$1" pin="2"/>
+<pinref part="LED" gate="G$1" pin="K"/>
+<wire x1="120.142" y1="121.412" x2="120.142" y2="120.396" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
