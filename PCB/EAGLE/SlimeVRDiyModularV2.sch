@@ -3091,6 +3091,7 @@ By using any of these models, you agree that this information has been provided 
 <part name="GND5" library="DecawaveLibrary" library_urn="urn:adsk.eagle:library:5224885" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="V+" device=""/>
 <part name="P+3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="V+" device=""/>
+<part name="GND6" library="DecawaveLibrary" library_urn="urn:adsk.eagle:library:5224885" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -3188,8 +3189,8 @@ POSITRON ELEKTRONIK</text>
 <attribute name="VALUE" x="95.504" y="100.33" size="1.016" layer="96" align="top-center"/>
 </instance>
 <instance part="IC1" gate="G$1" x="77.724" y="60.706" smashed="yes">
-<attribute name="NAME" x="80.264" y="23.876" size="1.778" layer="95" rot="R90" align="center-left"/>
-<attribute name="VALUE" x="80.264" y="31.496" size="1.778" layer="96" rot="R90" align="center-left"/>
+<attribute name="NAME" x="85.344" y="16.256" size="1.016" layer="95" rot="R180" align="center-left"/>
+<attribute name="VALUE" x="105.41" y="16.002" size="1.016" layer="96" rot="R180" align="center-left"/>
 </instance>
 <instance part="R10" gate="G$1" x="55.88" y="76.454" smashed="yes" rot="R180">
 <attribute name="NAME" x="46.228" y="76.454" size="1.016" layer="95" rot="R180" align="center-left"/>
@@ -3200,12 +3201,12 @@ POSITRON ELEKTRONIK</text>
 <attribute name="VALUE" x="50.292" y="63.754" size="1.016" layer="96" rot="R180" align="center-left"/>
 </instance>
 <instance part="TX" gate="G$1" x="22.86" y="76.454" smashed="yes">
-<attribute name="NAME" x="33.782" y="77.216" size="1.016" layer="95"/>
-<attribute name="VALUE" x="23.368" y="77.47" size="1.016" layer="96"/>
+<attribute name="NAME" x="33.782" y="74.676" size="1.016" layer="95"/>
+<attribute name="VALUE" x="23.368" y="74.676" size="1.016" layer="96"/>
 </instance>
 <instance part="RX" gate="G$1" x="22.86" y="63.754" smashed="yes">
-<attribute name="NAME" x="34.29" y="64.516" size="1.016" layer="95"/>
-<attribute name="VALUE" x="23.368" y="64.77" size="1.016" layer="96"/>
+<attribute name="NAME" x="33.782" y="61.722" size="1.016" layer="95"/>
+<attribute name="VALUE" x="23.368" y="61.976" size="1.016" layer="96"/>
 </instance>
 <instance part="C17" gate="G$1" x="75.184" y="60.706" smashed="yes" rot="R180">
 <attribute name="NAME" x="72.898" y="59.69" size="1.016" layer="95" rot="R180" align="center-left"/>
@@ -3431,10 +3432,13 @@ POSITRON ELEKTRONIK</text>
 <attribute name="VALUE" x="233.426" y="69.088" size="1.016" layer="96" align="top-center"/>
 </instance>
 <instance part="P+1" gate="1" x="144.018" y="62.992" smashed="yes">
-<attribute name="VALUE" x="145.542" y="65.278" size="1.778" layer="96" rot="R180"/>
+<attribute name="VALUE" x="145.034" y="64.516" size="1.016" layer="96" rot="R180"/>
 </instance>
 <instance part="P+3" gate="1" x="150.622" y="98.806" smashed="yes" rot="R90">
-<attribute name="VALUE" x="148.336" y="100.33" size="1.778" layer="96" rot="R270"/>
+<attribute name="VALUE" x="149.606" y="99.822" size="1.778" layer="96" rot="R180"/>
+</instance>
+<instance part="GND6" gate="1" x="186.436" y="122.428" smashed="yes" rot="R270">
+<attribute name="VALUE" x="186.182" y="122.428" size="1.016" layer="96" rot="R270" align="top-center"/>
 </instance>
 </instances>
 <busses>
@@ -3562,6 +3566,14 @@ POSITRON ELEKTRONIK</text>
 <pinref part="EXT" gate="A" pin="1"/>
 <wire x1="240.03" y1="68.58" x2="237.998" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="GND5" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="TEMP"/>
+<pinref part="R15" gate="G$1" pin="1"/>
+<wire x1="196.088" y1="112.268" x2="196.088" y2="122.428" width="0.1524" layer="91"/>
+<wire x1="196.088" y1="122.428" x2="188.976" y2="122.428" width="0.1524" layer="91"/>
+<pinref part="GND6" gate="1" pin="GND"/>
+<junction x="188.976" y="122.428"/>
 </segment>
 </net>
 <net name="VBUS" class="0">
@@ -3894,14 +3906,6 @@ POSITRON ELEKTRONIK</text>
 <pinref part="STBY" gate="G$1" pin="A"/>
 <pinref part="R14" gate="G$1" pin="2"/>
 <wire x1="161.036" y1="108.966" x2="160.274" y2="108.966" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$17" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="TEMP"/>
-<pinref part="R15" gate="G$1" pin="1"/>
-<wire x1="196.088" y1="112.268" x2="196.088" y2="122.428" width="0.1524" layer="91"/>
-<wire x1="196.088" y1="122.428" x2="188.976" y2="122.428" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$18" class="0">

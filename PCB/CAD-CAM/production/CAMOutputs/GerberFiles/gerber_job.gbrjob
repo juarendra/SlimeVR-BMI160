@@ -1,7 +1,7 @@
 {
     "Header": {
         "Comment": "All values are metric (mm)",
-        "CreationDate": "2024-06-28T02:42:32Z",
+        "CreationDate": "2024-06-28T02:36:02Z",
         "GenerationSoftware": {
             "Application": "EAGLE",
             "Vendor": "Autodesk",
@@ -13,12 +13,12 @@
         "BoardThickness": 1.57,
         "LayerNumber": 2,
         "Name": {
-            "ProjectId": "SlimeVRDiyModularV2"
+            "ProjectId": "SlimeVRDiyModularV2_production"
         },
         "Owner": "juarendra ramadhani <jrjuarendra@gmail.com>",
         "Size": {
-            "X": 39.375247,
-            "Y": 39.497
+            "X": 80.518,
+            "Y": 80.264
         }
     }
 }
