@@ -3620,11 +3620,11 @@ POSITRON ELEKTRONIK</text>
 <wire x1="136.652" y1="75.692" x2="136.652" y2="59.944" width="0.1524" layer="91"/>
 <label x="136.652" y="75.692" size="1.016" layer="95" rot="R180" xref="yes"/>
 <pinref part="R5" gate="G$1" pin="2"/>
-<wire x1="136.652" y1="59.944" x2="138.938" y2="59.944" width="0.1524" layer="91"/>
 <junction x="136.652" y="59.944"/>
 <pinref part="D1" gate="G$1" pin="A"/>
-<wire x1="138.938" y1="59.944" x2="138.938" y2="54.864" width="0.1524" layer="91"/>
-<wire x1="138.938" y1="54.864" x2="139.954" y2="54.864" width="0.1524" layer="91"/>
+<wire x1="139.954" y1="54.864" x2="138.938" y2="54.864" width="0.1524" layer="91"/>
+<wire x1="138.938" y1="54.864" x2="138.938" y2="59.944" width="0.1524" layer="91"/>
+<wire x1="138.938" y1="59.944" x2="136.652" y2="59.944" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="RTS" class="0">

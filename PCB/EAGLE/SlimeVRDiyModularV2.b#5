@@ -3,7 +3,7 @@
 <eagle version="9.6.2">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.127" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mm"/>
@@ -3361,6 +3361,18 @@ design rules under a new name.</description>
 <attribute name="NAME" x="23.749" y="77.597" size="0.6096" layer="25" align="center"/>
 <attribute name="VALUE" x="21.59" y="77.47" size="1.27" layer="27" align="center"/>
 </element>
+<element name="C22" library="AccesControlNFC" library_urn="urn:adsk.eagle:library:37185839" package="CAPC1608X87N" package3d_urn="urn:adsk.eagle:package:22671642/2" value="1uf" x="28.829" y="68.961" smashed="yes" rot="R270">
+<attribute name="DESCRIPTION" value="Wurth Elektronik 0603 WCAP-CSGP 100nF Ceramic Multilayer Capacitor, 25 V dc, +125C, X7R Dielectric, +/-10%" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="DIGIKEY_PARTNUMBER" value="732-7989-1-ND" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="DIGIKEY_PRICE-STOCK" value="https://www.digikey.com/product-detail/en/w%C3%BCrth-elektronik/885012206071/732-7989-1-ND/5454616" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="HEIGHT" value="0.87mm" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MANUFACTURER_NAME" value="Wurth Elektronik" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MANUFACTURER_PART_NUMBER" value="885012206071" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MOUSER_PART_NUMBER" value="710-885012206071" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MOUSER_PRICE-STOCK" value="https://www.mouser.co.uk/ProductDetail/Wurth-Elektronik/885012206071?qs=0KOYDY2FL2%2FEBQkuHgvarg%3D%3D" x="-46.101" y="147.701" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="NAME" x="29.972" y="68.834" size="0.6096" layer="25" rot="R270" align="center"/>
+<attribute name="VALUE" x="28.829" y="68.961" size="1.27" layer="27" rot="R270" align="center"/>
+</element>
 <element name="C23" library="AccesControlNFC" library_urn="urn:adsk.eagle:library:37185839" package="CAPC1608X87N" package3d_urn="urn:adsk.eagle:package:22671642/2" value="100nf" x="28.829" y="74.168" smashed="yes" rot="R270">
 <attribute name="DESCRIPTION" value="Wurth Elektronik 0603 WCAP-CSGP 100nF Ceramic Multilayer Capacitor, 25 V dc, +125C, X7R Dielectric, +/-10%" x="-51.181" y="165.608" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="DIGIKEY_PARTNUMBER" value="732-7989-1-ND" x="-51.181" y="165.608" size="1.778" layer="27" rot="R270" display="off"/>
@@ -3517,18 +3529,6 @@ design rules under a new name.</description>
 <attribute name="NAME" x="28.448" y="66.675" size="0.6096" layer="25" rot="R180" align="center"/>
 <attribute name="VALUE" x="30.226" y="66.675" size="1.27" layer="27" rot="R180" align="center"/>
 </element>
-<element name="R5" library="AccesControlNFC" library_urn="urn:adsk.eagle:library:37185839" package="RESC1608X55N" package3d_urn="urn:adsk.eagle:package:22641552/7" value="10k" x="28.829" y="68.961" smashed="yes" rot="R270">
-<attribute name="DESCRIPTION" value="Thick Film Resistors - SMD 0603 10Kohm 5% Anti Surge AEC-Q200" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="DIGIKEY_PARTNUMBER" value="RHM10KDCT-ND" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="DIGIKEY_PRICE-STOCK" value="https://www.digikey.com/product-detail/en/rohm-semiconductor/ESR03EZPJ103/RHM10KDCT-ND/1762925" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="HEIGHT" value="0.55mm" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MANUFACTURER_NAME" value="ROHM Semiconductor" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MANUFACTURER_PART_NUMBER" value="ESR03EZPJ103" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MOUSER_PART_NUMBER" value="755-ESR03EZPJ103" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MOUSER_PRICE-STOCK" value="https://www.mouser.com/Search/Refine.aspx?Keyword=755-ESR03EZPJ103" x="28.829" y="68.961" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="NAME" x="28.829" y="68.961" size="1.27" layer="25" rot="R270" align="center"/>
-<attribute name="VALUE" x="28.829" y="68.961" size="1.27" layer="27" rot="R270" align="center"/>
-</element>
 </elements>
 <signals>
 <signal name="GND">
@@ -3548,6 +3548,7 @@ design rules under a new name.</description>
 <contactref element="Q4" pad="6"/>
 <contactref element="Q4" pad="7"/>
 <contactref element="C23" pad="1"/>
+<contactref element="C22" pad="1"/>
 <contactref element="C20" pad="1"/>
 <contactref element="C21" pad="1"/>
 <contactref element="ESP32" pad="39_15"/>
@@ -3666,7 +3667,6 @@ design rules under a new name.</description>
 <wire x1="22.2024" y1="52.197" x2="22.2024" y2="48.514" width="0.254" layer="16"/>
 <wire x1="22.2024" y1="48.0286" x2="22.4536" y2="47.7774" width="0.254" layer="1"/>
 <wire x1="22.479" y1="47.42036875" x2="22.479" y2="46.293" width="0.254" layer="1"/>
-<contactref element="R5" pad="1"/>
 </signal>
 <signal name="SDA">
 <contactref element="ESP32" pad="33"/>
@@ -3733,6 +3733,8 @@ design rules under a new name.</description>
 <contactref element="C18" pad="2"/>
 <contactref element="IC1" pad="15"/>
 <contactref element="U6" pad="1"/>
+<contactref element="D1" pad="A"/>
+<contactref element="C22" pad="2"/>
 <wire x1="20.625" y1="51.295" x2="21.603" y2="51.295" width="0.4064" layer="1"/>
 <wire x1="22.479" y1="51.243" x2="21.655" y2="51.243" width="0.4064" layer="1"/>
 <wire x1="21.603" y1="51.295" x2="21.655" y2="51.243" width="0.4064" layer="1"/>
@@ -3787,16 +3789,11 @@ design rules under a new name.</description>
 <wire x1="28.321" y1="65.024" x2="28.321" y2="67.056" width="0.4064" layer="1"/>
 <wire x1="27.813" y1="67.564" x2="28.321" y2="67.056" width="0.4064" layer="1"/>
 <wire x1="27.368" y1="64.071" x2="28.321" y2="65.024" width="0.4064" layer="1"/>
-<wire x1="27.813" y1="67.564" x2="27.813" y2="68.199" width="0.4064" layer="1"/>
-<wire x1="27.813" y1="68.199" x2="27.813" y2="68.326" width="0.4064" layer="1"/>
-<wire x1="27.813" y1="68.326" x2="27.334" y2="68.805" width="0.4064" layer="1"/>
-<wire x1="27.813" y1="68.199" x2="28.575" y2="68.199" width="0.4064" layer="1"/>
-<contactref element="R5" pad="2"/>
-<wire x1="28.575" y1="68.199" x2="28.794" y2="68.199" width="0.4064" layer="1"/>
-<wire x1="28.829" y1="68.161" x2="28.791" y2="68.199" width="0.1524" layer="1"/>
-<wire x1="28.791" y1="68.199" x2="28.575" y2="68.199" width="0.1524" layer="1"/>
-<contactref element="D1" pad="A"/>
-<wire x1="27.334" y1="68.805" x2="27.334" y2="70.485" width="0.4064" layer="1"/>
+<wire x1="27.813" y1="67.564" x2="27.813" y2="68.326" width="0.4064" layer="1"/>
+<wire x1="27.334" y1="70.485" x2="27.334" y2="68.805" width="0.4064" layer="1"/>
+<wire x1="27.334" y1="68.805" x2="27.813" y2="68.326" width="0.4064" layer="1"/>
+<wire x1="27.813" y1="68.326" x2="28.794" y2="68.326" width="0.4064" layer="1"/>
+<wire x1="28.794" y1="68.326" x2="28.829" y2="68.291" width="0.4064" layer="1"/>
 </signal>
 <signal name="RTS">
 <contactref element="R8" pad="1"/>
