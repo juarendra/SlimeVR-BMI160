@@ -29,8 +29,7 @@ Project ini, oleh [Positron Electronik](https://www.tokopedia.com/positronelectr
 
 ### 1. Isi Paket (Untuk Produk Jadi)
 - 1x Unit Tracker SlimeVR-BMI160
-- 1x Baterai LiPo (sudah terpasang)
-- 1x Tali Pengikat Elastis (Strap)
+- 1x Baterai LiPo (sudah terpasang)\
 
 ### 2. Pengisian Daya
 Sebelum penggunaan, isi daya tracker menggunakan kabel USB-C.
