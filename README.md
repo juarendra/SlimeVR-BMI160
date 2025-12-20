@@ -16,10 +16,52 @@ Project ini, oleh [Positron Electronik](https://www.tokopedia.com/positronelectr
     - Input daya via USB-C atau baterai LiPo 1s.
     - Sirkuit charger baterai (TP4056) dengan proteksi (DW01A).
 - **Konektor Eksternal**: Port I2C tambahan untuk ekspansi.
-- **Indikator**: 5 LED notifikasi (Charging, Standby, Serial).
+- **Indikator LED**: Terdapat 5 buah LED dengan fungsi sebagai berikut:
+    - **LED 1 (Biru)**: Indikator pengisian daya (menyala saat baterai sedang diisi).
+    - **LED 2 (Merah)**: Indikator baterai penuh (menyala saat pengisian selesai).
+    - **LED 3 (Merah)**: Indikator ACK, berkedip saat tracker menerima konfirmasi (acknowledgment) bahwa slimevr sedang running.
+    - **LED 4 & 5 (Merah/Biru)**: Indikator Serial (TX/RX), akan menyala atau berkedip saat proses flashing firmware.
 - **Tombol & Saklar**: Tombol Reset dan Saklar On/Off.
 
 ---
+
+## Panduan Penggunaan dan Konfigurasi
+
+### 1. Isi Paket (Untuk Produk Jadi)
+- 1x Unit Tracker SlimeVR-BMI160
+- 1x Baterai LiPo (sudah terpasang)
+- 1x Tali Pengikat Elastis (Strap)
+
+### 2. Pengisian Daya
+Sebelum penggunaan, isi daya tracker menggunakan kabel USB-C.
+- Lampu **biru** akan menyala saat pengisian berlangsung.
+- Lampu **merah** akan menyala jika baterai sudah penuh.
+
+### 3. Konfigurasi Wi-Fi (PENTING!)
+Tracker ini **tidak memiliki portal web** untuk pengaturan Wi-Fi. Nama (SSID) dan password Wi-Fi Anda harus dimasukkan langsung ke dalam kode firmware (`hardcode`) sebelum di-upload (flash) ke tracker.
+
+Ini berarti, jika Anda ingin menghubungkan tracker ke jaringan Wi-Fi baru, Anda **wajib melakukan proses flashing ulang.**
+
+Untuk panduan lengkap mengenai cara instalasi software, memasukkan detail Wi-Fi, dan melakukan flashing, silakan ikuti panduan terperinci di bawah ini.
+
+### **➡️ [Klik di sini untuk Panduan Flashing Lengkap](./FIRMWARE/README.md)**
+
+### 4. Pemecahan Masalah Umum
+- **Tracker tidak muncul di server SlimeVR.**
+    - **Penyebab paling umum:** Pastikan Anda telah memasukkan SSID dan Password Wi-Fi **dengan benar** di dalam file konfigurasi (`platformio.ini`) sebelum melakukan flashing, sesuai dengan panduan di atas.
+    - Pastikan PC dan tracker berada di jaringan Wi-Fi yang sama.
+    - Pastikan saklar tracker sudah dalam posisi ON dan baterai terisi.
+    - Coba restart tracker dan aplikasi SlimeVR Server di PC Anda.
+
+- **Lampu LED tidak menyala sama sekali.**
+    - Pastikan saklar sudah di posisi ON.
+    - Sambungkan tracker ke charger USB-C untuk memastikan baterai tidak habis total. Jika lampu charger menyala, biarkan terisi daya selama beberapa saat sebelum mencoba lagi.
+
+---
+
+## Untuk Pengembang (DIY)
+
+Bagian ini ditujukan untuk Anda yang ingin merakit atau memodifikasi tracker dari awal.
 
 ## Isi Repositori
 Berikut adalah penjelasan singkat mengenai isi dari setiap direktori utama:
