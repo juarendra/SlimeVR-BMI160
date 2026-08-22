@@ -44,6 +44,10 @@ void reportWifiError() {
 	}
 }
 
+void sendProvisionFailure(const char* error) {
+	Serial.printf("[WIFI-PROVISION] FAILED %s\n", error);
+}
+
 void setStaticIPIfDefined() {
 #ifdef WIFI_USE_STATICIP
 	const IPAddress ip(WIFI_STATIC_IP);
@@ -55,10 +59,18 @@ void setStaticIPIfDefined() {
 
 bool WiFiNetwork::isConnected() { return isWifiConnected; }
 
+void sendProvisionResponse(const char* status, const char* message = nullptr) {
+	if (message) {
+		Serial.printf("[WIFI-PROVISION] %s %s\n", status, message);
+	} else {
+		Serial.printf("[WIFI-PROVISION] %s\n", status);
+	}
+}
+
 void WiFiNetwork::setWiFiCredentials(const char* SSID, const char* pass) {
 	stopProvisioning();
 	setStaticIPIfDefined();
-	wifiHandlerLogger.info("Connecting to SSID '%s' with password length %d", SSID, pass ? strlen(pass) : 0);
+	wifiHandlerLogger.info("Connecting to WiFi with credentials (length %d)", pass ? strlen(pass) : 0);
 	WiFi.begin(SSID, pass);
 	// Reset state, will get back into provisioning if can't connect
 	hadWifi = false;
@@ -127,11 +139,8 @@ void onConnected() {
 	statusManager.setStatus(SlimeVR::Status::WIFI_CONNECTING, false);
 	isWifiConnected = true;
 	hadWifi = true;
-	wifiHandlerLogger.info(
-		"Connected successfully to SSID '%s', IP address %s",
-		WiFi.SSID().c_str(),
-		WiFi.localIP().toString().c_str()
-	);
+	sendProvisionResponse("CONNECTED", WiFi.localIP().toString().c_str());
+	wifiHandlerLogger.info("Connected successfully, IP address %s", WiFi.localIP().toString().c_str());
 }
 
 uint8_t WiFiNetwork::getWiFiState() { return wifiState; }
@@ -263,12 +272,8 @@ void WiFiNetwork::upkeep() {
 					if (!hadWifi && !WiFi.smartConfigDone()
 						&& wifiConnectionTimeout + 11000 < millis()) {
 						if (WiFi.status() != WL_IDLE_STATUS) {
-					wifiHandlerLogger.error(
-						"Can't connect from any credentials, status: %d (SSID: %s, PSK length: %d)",
-						WiFi.status(),
-						WiFi.SSID().c_str(),
-						WiFi.psk().length()
-					);
+							wifiHandlerLogger.error("Can't connect from any credentials, status: %d", WiFi.status());
+							sendProvisionFailure("NO_CONNECTION");
 							wifiConnectionTimeout = millis();
 						}
 						startProvisioning();

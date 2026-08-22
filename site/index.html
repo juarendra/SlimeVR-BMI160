@@ -5,485 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SlimeVR BMI160 Firmware Installer</title>
   <meta name="description" content="Flash and configure SlimeVR BMI160 tracker firmware">
-  <script>
-    // Global showStep hoisted before body so event handlers can call it.
-    // Declared as a function statement so the binding is hoisted and globally
-    // available as both window.showStep and a local symbol within later scripts.
-    function showStep(stepIndex) {
-      const items = document.querySelectorAll('.step-item');
-      const contents = document.querySelectorAll('.step-content');
-      items.forEach((item, idx) => {
-        item.classList.toggle('active', idx === stepIndex);
-      });
-      contents.forEach((content, idx) => {
-        content.classList.toggle('hidden', idx !== stepIndex);
-      });
-    }
-    window.showStep = showStep;
-  </script>
-  <style>
-    :root {
-      --ink-950: #0b0e0d;
-      --ink-900: #111614;
-      --ink-850: #171d1a;
-      --ink-800: #1e2622;
-      --line: rgba(226, 232, 228, 0.12);
-      --paper: #e8ece9;
-      --muted: #98a39d;
-      --signal: #b8f35a;
-      --signal-dark: #263b18;
-      --copper: #d58a52;
-      --warning: #f2b84b;
-      --danger: #ef6a62;
-      --success: #70d49b;
-      
-      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s8: 48px;
-      --r-sm: 8px; --r: 12px; --r-lg: 16px; --r-xl: 24px; --r-full: 999px;
-      --t-xs: 12px; --t-sm: 14px; --t-base: 16px; --t-lg: 20px; --t-xl: 24px; --t-2xl: 32px;
-      
-      --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-      background: var(--ink-950);
-      color: var(--paper);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      line-height: 1.5;
-    }
-
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: var(--s6) var(--s4);
-      flex: 1;
-    }
-
-    header {
-      border-bottom: 1px solid var(--line);
-      padding: var(--s4) 0;
-      margin-bottom: var(--s8);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: var(--s3);
-    }
-
-    .brand h1 {
-      font-size: var(--t-2xl);
-      font-weight: 650;
-      letter-spacing: -0.03em;
-    }
-
-    .brand small {
-      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-      color: var(--muted);
-      font-size: var(--t-sm);
-    }
-
-    .browser-warning {
-      display: none;
-      background: var(--ink-800);
-      border: 1px solid var(--danger);
-      color: var(--paper);
-      padding: var(--s3);
-      margin-bottom: var(--s6);
-      border-radius: var(--r);
-      font-size: var(--t-sm);
-    }
-
-    .browser-warning.visible {
-      display: block;
-    }
-
-    .main-grid {
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: var(--s8);
-    }
-
-    .step-rail {
-      position: sticky;
-      top: var(--s6);
-      height: fit-content;
-    }
-
-    .step-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--s2);
-    }
-
-    .step-item {
-      display: flex;
-      align-items: center;
-      gap: var(--s3);
-      color: var(--muted);
-      font-size: var(--t-sm);
-      padding: var(--s2) var(--s3);
-      border-radius: var(--r);
-      cursor: pointer;
-      user-select: none;
-      transition: 0.15s var(--ease);
-    }
-
-    .step-item:hover {
-      background: var(--ink-850);
-      color: var(--paper);
-    }
-
-    .step-item.active {
-      background: var(--signal-dark);
-      color: var(--signal);
-      font-weight: 600;
-    }
-
-    .step-number {
-      background: var(--ink-800);
-      border: 1px solid var(--line);
-      border-radius: var(--r-full);
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--t-xs);
-      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-    }
-
-    .step-item.active .step-number {
-      background: var(--signal);
-      color: var(--ink-950);
-      border-color: var(--signal);
-    }
-
-    .step-content {
-      background: var(--ink-900);
-      border: 1px solid var(--line);
-      border-radius: var(--r-lg);
-      padding: var(--s6);
-      min-height: 400px;
-    }
-
-    .step-title {
-      font-size: var(--t-xl);
-      font-weight: 600;
-      margin-bottom: var(--s3);
-      color: var(--paper);
-    }
-
-    .step-instruction {
-      color: var(--paper);
-      margin-bottom: var(--s6);
-      line-height: 1.6;
-    }
-
-    .action-area {
-      background: var(--ink-850);
-      border-radius: var(--r);
-      padding: var(--s6);
-      margin-bottom: var(--s5);
-    }
-
-    .wifi-form {
-      display: flex;
-      flex-direction: column;
-      gap: var(--s4);
-      max-width: 420px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: var(--s2);
-    }
-
-    .form-group label {
-      font-size: var(--t-sm);
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: var(--s3) var(--s4);
-      background: var(--ink-950);
-      border: 1px solid var(--line);
-      color: var(--paper);
-      border-radius: var(--r);
-      font-size: var(--t-base);
-      transition: 0.18s var(--ease);
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--signal);
-      box-shadow: 0 0 0 2px var(--signal-dark);
-    }
-
-    .password-toggle {
-      position: absolute;
-      right: var(--s3);
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      padding: var(--s1);
-      font-size: var(--t-sm);
-      border-radius: var(--r);
-      transition: 0.18s var(--ease);
-    }
-
-    .password-toggle:hover {
-      color: var(--paper);
-      background: var(--ink-800);
-    }
-
-    .btn-primary {
-      background: var(--signal);
-      color: var(--ink-950);
-      padding: var(--s3) var(--s6);
-      border: none;
-      border-radius: var(--r);
-      font-weight: 600;
-      font-size: var(--t-base);
-      cursor: pointer;
-      transition: 0.18s var(--ease);
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .status-log {
-      background: var(--ink-950);
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      padding: var(--s4);
-      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-      font-size: var(--t-xs);
-      color: var(--muted);
-      min-height: 100px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .status-line {
-      margin-bottom: var(--s1);
-      white-space: pre-wrap;
-    }
-
-    .status-line.success { color: var(--success); }
-    .status-line.error { color: var(--danger); }
-    .status-line.warn { color: var(--warning); }
-
-    .status-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--s4);
-      background: var(--ink-900);
-      border: 1px solid var(--line);
-      border-radius: var(--r-lg);
-      padding: var(--s3) var(--s5);
-      margin-bottom: var(--s6);
-      flex-wrap: wrap;
-    }
-
-    .status-group {
-      display: flex;
-      align-items: center;
-      gap: var(--s3);
-      flex-wrap: wrap;
-    }
-
-    .btn-serial-connect {
-      background: #7a1f1d;
-      color: #ffd2cf;
-      border: 1px solid #c93b3b;
-      padding: var(--s2) var(--s4);
-      border-radius: var(--r-full);
-      font-weight: 600;
-      font-size: var(--t-xs);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--s2);
-      transition: 0.2s var(--ease);
-      user-select: none;
-    }
-
-    .btn-serial-connect.connected {
-      background: #17381e;
-      color: #92e6a7;
-      border-color: #2b823e;
-    }
-
-    .btn-serial-connect:hover {
-      filter: brightness(1.15);
-    }
-
-    .identity-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--copper);
-      border-radius: var(--r-full);
-    }
-
-    .device-id {
-      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-    }
-
-    .status-led {
-      width: 10px;
-      height: 10px;
-      border-radius: var(--r-full);
-      background: var(--ink-800);
-      border: 1px solid var(--line);
-      transition: 0.2s var(--ease);
-    }
-
-    .status-led.ok { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .status-led.error { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-    .status-led.wait { background: var(--warning); animation: pulse 1s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .progress-bar {
-      height: 4px;
-      background: var(--ink-950);
-      border-radius: var(--r-full);
-      overflow: hidden;
-      margin: var(--s4) 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--signal);
-      border-radius: var(--r-full);
-      width: 0%;
-      transition: width 0.3s var(--ease);
-    }
-
-    .footer {
-      border-top: 1px solid var(--line);
-      padding: var(--s6) 0;
-      margin-top: var(--s8);
-      font-size: var(--t-xs);
-      color: var(--muted);
-    }
-
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--s6);
-      margin-top: var(--s3);
-    }
-
-    .footer-links a {
-      color: var(--paper);
-      text-decoration: none;
-    }
-
-    .footer-links a:hover {
-      color: var(--signal);
-    }
-
-    .details-toggle {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-size: var(--t-sm);
-      cursor: pointer;
-      margin-top: var(--s4);
-      text-align: left;
-    }
-
-    .details-toggle::summary {
-      display: list-item;
-    }
-
-    details summary {
-      cursor: pointer;
-      color: var(--muted);
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: var(--s2);
-    }
-
-    details summary::before {
-      content: "ℹ️ ";
-    }
-
-    details[open] summary {
-      color: var(--signal);
-    }
-
-    .recovery-list {
-      margin-top: var(--s3);
-      color: var(--muted);
-      font-size: var(--t-sm);
-      line-height: 1.6;
-    }
-
-    .recovery-list li {
-      margin-bottom: var(--s2);
-    }
-
-    .hidden { display: none; }
-
-    @media (max-width: 768px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-      .step-rail {
-        position: static;
-        display: flex;
-        gap: var(--s2);
-        overflow-x: auto;
-        padding-bottom: var(--s2);
-      }
-      .step-list {
-        flex-direction: row;
-      }
-      .step-item {
-        flex: 0 0 auto;
-        padding: var(--s2) var(--s3);
-      }
-      .container {
-        padding: var(--s4);
-      }
-    }
-  </style>
+  <script src="app.js"></script>
 </head>
 <body>
   <div class="container">
@@ -493,13 +15,10 @@
         <small>Firmware Installer</small>
       </div>
     </header>
-
     <div id="browser-warning" class="browser-warning">
       <strong>Browser not supported:</strong> This tool requires Google Chrome or Microsoft Edge on Windows. 
       Your browser does not support Web Serial API.
     </div>
-
-    <!-- Global Top Persistent Bar -->
     <div class="status-bar">
       <div class="status-group">
         <button id="btn-top-serial" class="btn-serial-connect">
@@ -507,7 +26,6 @@
           <span id="top-serial-text">Connect Serial (Disconnected)</span>
         </button>
       </div>
-
       <div class="status-group">
         <div class="hardware-identity" id="top-firmware-badge" style="border-color: var(--line); color: var(--paper);">
           <span class="identity-dot" id="top-firmware-dot" style="background: var(--warning);"></span>
@@ -515,7 +33,6 @@
         </div>
       </div>
     </div>
-
     <div class="main-grid">
       <nav class="step-rail">
         <div class="step-list">
@@ -541,9 +58,7 @@
           </div>
         </div>
       </nav>
-
       <main id="app-content">
-        <!-- Step 0: Inspect -->
         <section id="step-0" class="step-content">
           <h2 class="step-title">Inspect Device</h2>
           <p class="step-instruction">
@@ -551,7 +66,6 @@
             Click <strong>Connect Serial</strong> above to link your tracker port.
             Use the step rail on the left to navigate.
           </p>
-
           <details>
             <summary>Troubleshooting</summary>
             <ul class="recovery-list">
@@ -562,35 +76,28 @@
             </ul>
           </details>
         </section>
-
-        <!-- Step 1: Flash -->
         <section id="step-1" class="step-content hidden">
           <h2 class="step-title">Flash Firmware</h2>
           <p class="step-instruction">
             This will flash the generic SlimeVR BMI160 firmware to your tracker.
             Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation will be preserved.
           </p>
-
           <div class="action-area">
             <button id="btn-flash-firmware" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;">
               ⚡ Flash SlimeVR BMI160 Tracker
             </button>
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
           </div>
-
           <p class="step-instruction" style="font-size: var(--t-sm);">
             <strong>Note:</strong> After flashing, the device will reboot. Wait for the serial port to reappear before proceeding to WiFi setup.
           </p>
         </section>
-
-        <!-- Step 2: WiFi -->
         <section id="step-2" class="step-content hidden">
           <h2 class="step-title">WiFi Setup</h2>
           <p class="step-instruction">
             Enter your WiFi credentials. They will be sent directly to your tracker over USB serial.
             Credentials are never sent to GitHub or any server.
           </p>
-
           <div class="action-area">
             <div class="wifi-form" id="wifi-form">
               <div class="form-group">
@@ -599,7 +106,6 @@
                   <input type="text" id="wifi-ssid" class="form-input" placeholder="e.g., HomeWiFi" autocomplete="off" spellcheck="false">
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="wifi-password">Password</label>
                 <div class="input-wrapper">
@@ -610,26 +116,21 @@
                   Required: 8-63 characters for WPA/WPA2 networks
                 </p>
               </div>
-
               <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
                 <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
                 <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
               </div>
             </div>
           </div>
-
           <div id="wifi-status" class="status-log">
             <div class="status-line">Waiting for WiFi credentials...</div>
           </div>
         </section>
-
-        <!-- Step 3: Verify -->
         <section id="step-3" class="step-content hidden">
           <h2 class="step-title">Verify</h2>
           <p class="step-instruction">
             Your tracker is now configured. Wait for it to connect to WiFi and appear in SlimeVR Server.
           </p>
-
           <div class="action-area">
             <div class="status-log" id="verify-log">
               <div class="status-line success">WiFi credentials accepted</div>
@@ -637,7 +138,6 @@
             </div>
             <p id="verify-result" style="margin-top: var(--s3); font-weight: 600;"></p>
           </div>
-
           <div class="action-area">
             <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Next Steps</h3>
             <ul style="list-style: none; font-size: var(--t-base);">
@@ -646,19 +146,14 @@
               <li>3. Complete sensor calibration if prompted</li>
             </ul>
           </div>
-
           <button id="btn-reset" class="btn-primary" style="max-width: 200px; background: var(--ink-850);">Start Over</button>
         </section>
-
-        <!-- Step 4: Serial Log -->
         <section id="step-4" class="step-content hidden">
           <h2 class="step-title">Serial Log</h2>
           <p class="step-instruction">
             Live stream from your tracker's USB serial port. Useful for debugging boot,
-            WiFi, IMU, or SlimeVR protocol output. The stream is read-only; no commands
-            are sent here (use the WiFi Setup step for provisioning).
+            WiFi, IMU, or SlimeVR protocol output.
           </p>
-
           <div class="action-area">
             <div style="display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center;">
               <button id="btn-log-connect" class="btn-primary" style="max-width: 200px;">Start Streaming</button>
@@ -668,25 +163,9 @@
               </label>
               <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
             </div>
-
-            <pre id="live-log" style="
-              margin-top: var(--s4);
-              background: var(--ink-950);
-              border: 1px solid var(--line);
-              border-radius: 8px;
-              padding: var(--s3);
-              max-height: 50vh;
-              overflow-y: auto;
-              font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
-              font-size: 12px;
-              line-height: 1.5;
-              color: var(--paper);
-              white-space: pre-wrap;
-              word-break: break-all;
-            ">// Serial log will appear here once streaming starts.
-//</pre>
+            <pre id="live-log" style="margin-top: var(--s4); background: var(--ink-950); border: 1px solid var(--line); border-radius: 8px; padding: var(--s3); max-height: 50vh; overflow-y: auto; font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: var(--paper); white-space: pre-wrap; word-break: break-all;">// Serial log will appear here once streaming starts.
+            //</pre>
           </div>
-
           <div class="action-area">
             <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
             <ul style="list-style: none; font-size: var(--t-base); color: var(--muted);">
@@ -698,7 +177,6 @@
         </section>
       </main>
     </div>
-
     <footer class="footer">
       <div>
         <strong>Privacy:</strong> All WiFi credentials remain in browser memory and travel only over local USB serial.
@@ -712,20 +190,9 @@
       </div>
     </footer>
   </div>
-
-  <!-- ESP Web Tools -->
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   <script type="module">
-    // Force-load the dialog custom element so we can construct <ewt-install-dialog>
-    // directly (instead of via <esp-web-install-button> which would re-trigger
-    // navigator.serial.requestPort()). Importing the module side-effect-registers it.
     import 'https://unpkg.com/esp-web-tools@10/dist/web/install-dialog-im156JnI.js?module';
-
-    // Patch the install dialog so its primary action button reads
-    // "Flash SlimeVR BMI160 Tracker" instead of "Install SlimeVR BMI160 Tracker".
-    // The dialog is built with Lit templates that bake in the "Install" prefix
-    // literally, so we hook the element's update lifecycle and rewrite matching
-    // text nodes after each render.
     customElements.whenDefined('ewt-install-dialog').then(() => {
       const Cls = customElements.get('ewt-install-dialog');
       if (!Cls || Cls.__flashPatched) return;
@@ -735,27 +202,17 @@
         if (origUpdated) origUpdated.call(this, changedProps);
         const root = this.shadowRoot;
         if (!root) return;
-        // Lit may schedule multiple async updates; patch each one.
         queueMicrotask(() => {
           if (!this.shadowRoot) return;
           const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_TEXT);
           let node;
           while ((node = walker.nextNode())) {
             if (node.nodeValue && node.nodeValue.includes('Install SlimeVR BMI160 Tracker')) {
-              node.nodeValue = node.nodeValue.replaceAll(
-                'Install SlimeVR BMI160 Tracker',
-                'Flash SlimeVR BMI160 Tracker'
-              );
+              node.nodeValue = node.nodeValue.replaceAll('Install SlimeVR BMI160 Tracker', 'Flash SlimeVR BMI160 Tracker');
             }
           }
         });
       };
-
-      // Patch _confirmInstall to manually pulse ESP32 into bootloader before the
-      // library's esptool classic reset. Some auto-downloader boards ignore the
-      // library's DTR/RTS polarity (it's tuned for CH340-family chips) and need
-      // the standard esptool.py sequence: DTR low -> RTS high (reset) -> DTR high
-      // (IO0=LOW) -> RTS low (EN=HIGH, bootloader).
       const origConfirm = Cls.prototype._confirmInstall;
       Cls.prototype._confirmInstall = async function () {
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -795,546 +252,6 @@
       };
     }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
   </script>
-  
-  <script>
-    // State machine
-    const STATE = {
-      UNSUPPORTED_BROWSER: 'UNSUPPORTED_BROWSER',
-      READY_TO_FLASH: 'READY_TO_FLASH',
-      FLASHING: 'FLASHING',
-      FLASH_COMPLETE: 'FLASH_COMPLETE',
-      READY_TO_PROVISION: 'READY_TO_PROVISION',
-      SERIAL_CONNECTING: 'SERIAL_CONNECTING',
-      SENDING_CREDENTIALS: 'SENDING_CREDENTIALS',
-      WAITING_FOR_WIFI: 'WAITING_FOR_WIFI',
-      CONNECTED: 'CONNECTED',
-      PROVISION_FAILED: 'PROVISION_FAILED',
-      DEVICE_DISCONNECTED: 'DEVICE_DISCONNECTED'
-    };
-
-    let activePort = null;
-    let currentState = null;
-    let logStreaming = false;
-
-    function updateSerialStatus(connected, portInfo = '') {
-      const btn = document.getElementById('btn-top-serial');
-      const led = document.getElementById('top-serial-led');
-      const text = document.getElementById('top-serial-text');
-      if (connected) {
-        btn?.classList.add('connected');
-        if (led) led.style.background = 'var(--success)';
-        if (text) text.textContent = portInfo ? `Serial: Connected (${portInfo})` : 'Serial: Connected';
-      } else {
-        btn?.classList.remove('connected');
-        if (led) led.style.background = 'var(--danger)';
-        if (text) text.textContent = 'Connect Serial (Disconnected)';
-      }
-    }
-
-    function updateFirmwareStatus(flashed) {
-      const dot = document.getElementById('top-firmware-dot');
-      const text = document.getElementById('top-firmware-text');
-      if (flashed) {
-        if (dot) dot.style.background = 'var(--success)';
-        if (text) {
-          text.textContent = 'Flashed (Ready)';
-          text.style.color = 'var(--success)';
-        }
-      } else {
-        if (dot) dot.style.background = 'var(--warning)';
-        if (text) {
-          text.textContent = 'Not Verified';
-          text.style.color = 'var(--warning)';
-        }
-      }
-    }
-
-    async function ensureSerialPort() {
-      if (activePort && activePort.readable && activePort.writable) {
-        return activePort;
-      }
-      try {
-        if (activePort) {
-          try { await activePort.close(); } catch(e) {}
-        }
-      } catch(e) {}
-
-      logToWifiLog('Opening serial port picker. Please select your tracker port...', 'info');
-      activePort = await navigator.serial.requestPort();
-      await activePort.open({ baudRate: 115200 });
-      updateSerialStatus(true, 'Ready');
-      return activePort;
-    }
-
-    document.getElementById('btn-top-serial')?.addEventListener('click', async () => {
-      try {
-        if (activePort && activePort.readable) {
-          try { await activePort.close(); } catch(e) {}
-          activePort = null;
-          updateSerialStatus(false);
-          logToWifiLog('Serial port disconnected.', 'info');
-          return;
-        }
-        await ensureSerialPort();
-        logToWifiLog('Serial connected! Checking device firmware status...', 'info');
-
-        // Check if firmware is already SlimeVR by reading a few lines or sending ping
-        try {
-          const reader = activePort.readable.getReader();
-          const decoder = new TextDecoder();
-          const startTime = Date.now();
-          let initialData = '';
-          
-          const timeout = setTimeout(() => {
-            try { reader.cancel(); } catch(e) {}
-          }, 2000);
-
-          try {
-            while (Date.now() - startTime < 2000) {
-              const { value, done } = await reader.read();
-              if (done) break;
-              initialData += decoder.decode(value, { stream: true });
-              if (initialData.includes('SlimeVR') || initialData.includes('BMI160') || initialData.includes('WiFi')) {
-                break;
-              }
-            }
-          } catch (readLoopErr) {
-            // Reader was cancelled or stream errored out; that's expected during probe.
-          }
-          clearTimeout(timeout);
-          try { reader.releaseLock(); } catch(e) {}
-
-          if (initialData.includes('SlimeVR') || initialData.includes('tracker') || initialData.length > 10) {
-            updateFirmwareStatus(true);
-            logToWifiLog('SlimeVR Tracker Firmware detected on port!', 'success');
-          } else {
-            // Still mark ready if connected
-            updateFirmwareStatus(true);
-            logToWifiLog('Port connected and responsive.', 'success');
-          }
-        } catch(readErr) {
-          updateFirmwareStatus(true);
-        }
-
-      } catch (err) {
-        logToWifiLog('Serial connection error: ' + err.message, 'error');
-        updateSerialStatus(false);
-      }
-    });
-
-    // DOM Elements
-    const browserWarning = document.getElementById('browser-warning');
-    const wifiForm = document.getElementById('wifi-form');
-    const btnConnectWifi = document.getElementById('btn-connect-wifi');
-    const btnRetryWifi = document.getElementById('btn-retry-wifi');
-    const wifiLog = document.getElementById('wifi-status');
-    const verifyResult = document.getElementById('verify-result');
-    const btnReset = document.getElementById('btn-reset');
-
-    // Check browser support
-    if (!('serial' in navigator) || !window.isSecureContext) {
-      showUnsupportedBrowser();
-    }
-
-    function showUnsupportedBrowser() {
-      currentState = STATE.UNSUPPORTED_BROWSER;
-      browserWarning.classList.add('visible');
-      btnConnectWifi.disabled = true;
-    }
-
-    function updateState(newState) {
-      currentState = newState;
-      const targetStep = getStepFromState(newState);
-      showStep(targetStep);
-    }
-
-    function getStepFromState(state) {
-      const stepMap = {
-        [STATE.UNSUPPORTED_BROWSER]: 0,
-        [STATE.READY_TO_FLASH]: 1,
-        [STATE.FLASHING]: 1,
-        [STATE.FLASH_COMPLETE]: 1,
-        [STATE.READY_TO_PROVISION]: 2,
-        [STATE.SERIAL_CONNECTING]: 2,
-        [STATE.SENDING_CREDENTIALS]: 2,
-        [STATE.WAITING_FOR_WIFI]: 2,
-        [STATE.CONNECTED]: 3,
-        [STATE.PROVISION_FAILED]: 2,
-        [STATE.DEVICE_DISCONNECTED]: 2
-      };
-      return stepMap[state] !== undefined ? stepMap[state] : 1;
-    }
-
-    // The top "Connect Serial" button is the global serial toggle. It stays
-    // visible on every step so the user can connect/disconnect at any time.
-
-    // Wrap the global showStep (declared in <head>) so streaming auto-stops
-    // when the user leaves step 5.
-    const _baseShowStep = window.showStep;
-    window.showStep = function(stepIndex) {
-      _baseShowStep(stepIndex);
-      if (stepIndex !== 4 && logStreaming) {
-        stopLogStream();
-      }
-    };
-
-    // showStep is defined globally in the head script; callable directly.
-
-    function logToWifiLog(message, type = 'info') {
-      const line = document.createElement('div');
-      line.className = `status-line ${type}`;
-      line.textContent = message;
-      wifiLog.appendChild(line);
-      wifiLog.scrollTop = wifiLog.scrollHeight;
-    }
-
-    // Helper: Validate WiFi credentials
-    function validateWifiCredentials(ssid, password) {
-      const encoder = new TextEncoder();
-      const ssidBytes = encoder.encode(ssid);
-      const passBytes = encoder.encode(password);
-
-      if (ssidBytes.length < 1 || ssidBytes.length > 32) {
-        return { valid: false, error: 'SSID must be 1-32 bytes' };
-      }
-
-      if (passBytes.length < 8 || passBytes.length > 63) {
-        return { valid: false, error: 'Password must be 8-63 bytes (WPA/WPA2)' };
-      }
-
-      return { valid: true };
-    }
-
-    // Setup navigation and step switching after DOM ready
-    window.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.step-item').forEach((item) => {
-        item.addEventListener('click', () => {
-          const step = parseInt(item.getAttribute('data-step'), 10);
-          showStep(step);
-        });
-      });
-    });
-
-    document.getElementById('toggle-password').addEventListener('click', function() {
-      const passwordInput = document.getElementById('wifi-password');
-      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-      this.textContent = passwordInput.type === 'password' ? '👁️' : '🙈';
-      this.setAttribute('aria-pressed', passwordInput.type === 'text');
-    });
-
-    btnReset.addEventListener('click', () => {
-      location.reload();
-    });
-
-    // WiFi connection
-    btnConnectWifi.addEventListener('click', async () => {
-      const ssid = document.getElementById('wifi-ssid').value.trim();
-      const password = document.getElementById('wifi-password').value;
-
-      const validation = validateWifiCredentials(ssid, password);
-      if (!validation.valid) {
-        logToWifiLog(`Validation error: ${validation.error}`, 'error');
-        return;
-      }
-
-      updateState(STATE.SERIAL_CONNECTING);
-      btnConnectWifi.classList.add('hidden');
-      btnRetryWifi.classList.remove('hidden');
-
-      let currentPort = null;
-      let serialReader = null;
-      let serialWriter = null;
-
-      try {
-        if (!('serial' in navigator)) {
-          showUnsupportedBrowser();
-          return;
-        }
-
-        logToWifiLog('Connecting to device serial port...', 'info');
-        currentPort = await ensureSerialPort();
-
-        serialReader = currentPort.readable.getReader();
-        serialWriter = currentPort.writable.getWriter();
-
-        const decoder = new TextDecoder();
-        const encoder = new TextEncoder();
-
-        logToWifiLog(`Configuring WiFi for SSID "${ssid}"...`, 'info');
-
-        // Send command
-        const command = `SET WIFI "${ssid}" "${password}"\n`;
-        await serialWriter.write(encoder.encode(command));
-
-        logToWifiLog('Command sent, waiting for acknowledgment from tracker...', 'info');
-
-        // Read tracker responses
-        let buffer = '';
-        let timeoutFired = false;
-        const timeout = setTimeout(() => {
-          timeoutFired = true;
-          logToWifiLog('Timeout waiting for response. Check if tracker is running.', 'warn');
-        }, 10000);
-
-        const startTime = Date.now();
-        let acknowledged = false;
-
-        try {
-          while (Date.now() - startTime < 35000) {
-            let value, done;
-            try {
-              ({ value, done } = await serialReader.read());
-            } catch (readErr) {
-              break;
-            }
-            if (done) break;
-
-            const text = decoder.decode(value, { stream: true });
-            buffer += text;
-
-            // Log lines from tracker to UI
-            const lines = buffer.split('\n');
-            buffer = lines.pop(); // Keep uncompleted line
-
-            for (const line of lines) {
-              const cleanLine = line.trim();
-              if (!cleanLine) continue;
-
-              if (cleanLine.includes('CMD SET WIFI OK') || cleanLine.includes('New wifi credentials set')) {
-                logToWifiLog('Tracker accepted credentials: ' + cleanLine, 'success');
-                acknowledged = true;
-                updateState(STATE.WAITING_FOR_WIFI);
-              } else if (cleanLine.includes('Connected successfully to')) {
-                logToWifiLog('Tracker connected to WiFi! ' + cleanLine, 'success');
-                updateState(STATE.CONNECTED);
-                verifyResult.textContent = `Connected to ${ssid}`;
-                verifyResult.style.color = 'var(--success)';
-                break;
-              } else if (cleanLine.includes("Can't connect") || cleanLine.includes('WIFI ERROR')) {
-                logToWifiLog('WiFi connection error: ' + cleanLine, 'error');
-                updateState(STATE.PROVISION_FAILED);
-                verifyResult.textContent = 'WiFi connection failed';
-                verifyResult.style.color = 'var(--danger)';
-                break;
-              } else if (cleanLine.includes('[INFO]') || cleanLine.includes('[DEBUG]') || cleanLine.includes('WiFi')) {
-                logToWifiLog(cleanLine, 'info');
-              }
-            }
-
-            if (currentState === STATE.CONNECTED || currentState === STATE.PROVISION_FAILED) {
-              break;
-            }
-          }
-        } finally {
-          clearTimeout(timeout);
-          if (!acknowledged && !timeoutFired && currentState !== STATE.CONNECTED && currentState !== STATE.PROVISION_FAILED) {
-            logToWifiLog('No acknowledgment from tracker. Verify serial connection and firmware.', 'warn');
-          }
-        }
-
-        // Release reader & writer lock
-        try {
-          serialReader.releaseLock();
-          serialWriter.releaseLock();
-        } catch (e) {}
-
-      } catch (error) {
-        logToWifiLog(`Error: ${error.message}`, 'error');
-        updateSerialStatus(false);
-        if (currentState !== STATE.PROVISION_FAILED) {
-          updateState(STATE.PROVISION_FAILED);
-        }
-        try {
-          if (serialReader) serialReader.releaseLock();
-          if (serialWriter) serialWriter.releaseLock();
-        } catch (e) {}
-      }
-    });
-
-    btnRetryWifi.addEventListener('click', () => {
-      // Keep SSID, clear password
-      document.getElementById('wifi-password').value = '';
-      btnRetryWifi.classList.add('hidden');
-      btnConnectWifi.classList.remove('hidden');
-      logToWifiLog('Ready to retry', 'info');
-    });
-
-    // ----- Serial Log streaming (step 4) -----
-    const btnLogConnect = document.getElementById('btn-log-connect');
-    const btnLogClear = document.getElementById('btn-log-clear');
-    const liveLog = document.getElementById('live-log');
-    const logAutoscroll = document.getElementById('log-autoscroll');
-    const logStatus = document.getElementById('log-status');
-
-    let logPort = null;
-    let logReader = null;
-    let logAbortController = null;
-
-    const logDecoder = new TextDecoder();
-
-    function appendLog(chunk) {
-      // Append to the <pre>; keep buffer bounded to ~256 KB to avoid OOM.
-      const MAX = 256 * 1024;
-      if (liveLog.textContent.length + chunk.length > MAX) {
-        liveLog.textContent = liveLog.textContent.slice(-MAX);
-      }
-      liveLog.textContent += chunk;
-      if (logAutoscroll.checked) {
-        liveLog.scrollTop = liveLog.scrollHeight;
-      }
-    }
-
-    function setLogStatus(text, cls) {
-      logStatus.textContent = text;
-      logStatus.className = 'status-line' + (cls ? ' ' + cls : '');
-    }
-
-    async function startLogStream() {
-      if (logStreaming) return;
-      if (!('serial' in navigator)) {
-        setLogStatus('Web Serial not supported in this browser.', 'error');
-        return;
-      }
-      try {
-        setLogStatus('Select your tracker port...', 'info');
-        logPort = await navigator.serial.requestPort();
-        await logPort.open({ baudRate: 115200 });
-        logStreaming = true;
-        logAbortController = new AbortController();
-        btnLogConnect.textContent = 'Stop Streaming';
-        setLogStatus('Streaming at 115200 baud.', 'success');
-
-        logReader = logPort.readable.getReader();
-        try {
-          while (logStreaming) {
-            let value, done;
-            try {
-              ({ value, done } = await logReader.read());
-            } catch (readErr) {
-              break;
-            }
-            if (done) break;
-            if (value) {
-              appendLog(logDecoder.decode(value, { stream: true }));
-            }
-          }
-        } finally {
-          try { logReader.releaseLock(); } catch (e) {}
-        }
-      } catch (err) {
-        setLogStatus('Error: ' + err.message, 'error');
-      } finally {
-        logStreaming = false;
-        btnLogConnect.textContent = 'Start Streaming';
-        if (logPort) {
-          try { await logPort.close(); } catch (e) {}
-          logPort = null;
-        }
-        setLogStatus('Disconnected.', 'warn');
-      }
-    }
-
-    function stopLogStream() {
-      if (!logStreaming) return;
-      logStreaming = false;
-      try { if (logReader) logReader.cancel(); } catch (e) {}
-      try { if (logPort) logPort.close(); } catch (e) {}
-    }
-
-    btnLogConnect.addEventListener('click', () => {
-      if (logStreaming) stopLogStream();
-      else startLogStream();
-    });
-
-    btnLogClear.addEventListener('click', () => {
-      liveLog.textContent = '';
-    });
-
-    // Update state on load
-    updateState(STATE.READY_TO_FLASH);
-
-    // ----- Flash Firmware button (step 1) -----
-    // Uses the ewt-install-dialog from esp-web-tools internally. We construct it
-    // programmatically and pass our already-open serial port so the user does
-    // NOT see a second port picker (the top Connect Serial button is the only
-    // place port selection happens).
-    const btnFlash = document.getElementById('btn-flash-firmware');
-    const flashStatus = document.getElementById('flash-status');
-    let flashDialog = null;
-
-    async function startFlash() {
-      // Guard: serial port must already be open via the top Connect Serial toggle.
-      if (!activePort || !activePort.readable || !activePort.writable) {
-        flashStatus.className = 'status-line error';
-        flashStatus.textContent = 'Connect your tracker serial port first (button at the top), then try again.';
-        const topBtn = document.getElementById('btn-top-serial');
-        if (topBtn) {
-          if (typeof topBtn.scrollIntoView === 'function') {
-            topBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-          topBtn.classList.add('attention-pulse');
-          setTimeout(() => topBtn.classList.remove('attention-pulse'), 1800);
-          try { topBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
-        }
-        return;
-      }
-
-      // Release the log-stream reader if it's holding the port, so the flash
-      // dialog's esptool transport can take it over.
-      if (typeof stopLogStream === 'function' && logStreaming) {
-        stopLogStream();
-        await new Promise(r => setTimeout(r, 150));
-      }
-
-      btnFlash.disabled = true;
-      flashStatus.className = 'status-line info';
-      flashStatus.textContent = 'Opening flash dialog...';
-
-      try {
-        flashDialog = document.createElement('ewt-install-dialog');
-        flashDialog.port = activePort;
-        flashDialog.manifestPath = './firmware/manifest.json';
-        document.body.appendChild(flashDialog);
-
-        flashDialog.addEventListener('closed', async (e) => {
-          // The dialog's _installState holds the final result.
-          const result = flashDialog._installState;
-          if (result && result.state === 'finished') {
-            flashStatus.className = 'status-line success';
-            flashStatus.textContent = 'Firmware installed successfully';
-            updateFirmwareStatus(true);
-            updateState(STATE.FLASH_COMPLETE);
-            setTimeout(() => {
-              updateState(STATE.READY_TO_PROVISION);
-              flashStatus.textContent = '';
-            }, 2500);
-          } else if (result && result.state === 'error') {
-            flashStatus.className = 'status-line error';
-            flashStatus.textContent = `Flash failed: ${result.message || 'unknown error'}`;
-          } else {
-            // Closed without finishing (user dismissed dialog).
-            flashStatus.className = 'status-line';
-            flashStatus.textContent = '';
-          }
-          // Dialog closes itself; ensure cleanup.
-          if (flashDialog && flashDialog.parentNode) {
-            flashDialog.parentNode.removeChild(flashDialog);
-          }
-          flashDialog = null;
-          btnFlash.disabled = false;
-        }, { once: true });
-      } catch (err) {
-        flashStatus.className = 'status-line error';
-        flashStatus.textContent = `Error: ${err.message}`;
-        btnFlash.disabled = false;
-        if (flashDialog && flashDialog.parentNode) {
-          flashDialog.parentNode.removeChild(flashDialog);
-        }
-        flashDialog = null;
-      }
-    }
-
-    btnFlash.addEventListener('click', startFlash);
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

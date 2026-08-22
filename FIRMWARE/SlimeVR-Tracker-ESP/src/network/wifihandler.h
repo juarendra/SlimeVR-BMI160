@@ -36,6 +36,9 @@ void upkeep();
 void setWiFiCredentials(const char* SSID, const char* pass);
 IPAddress getAddress();
 uint8_t getWiFiState();
+void startProvisioning();
+void stopProvisioning();
+bool isProvisioning();
 }  // namespace WiFiNetwork
 
 /** Wifi Reconnection Statuses **/
