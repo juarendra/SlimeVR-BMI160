@@ -287,16 +287,50 @@
     .status-line.error { color: var(--danger); }
     .status-line.warn { color: var(--warning); }
 
-    .hardware-identity {
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s4);
+      background: var(--ink-900);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      padding: var(--s3) var(--s5);
+      margin-bottom: var(--s6);
+      flex-wrap: wrap;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: var(--s3);
+      flex-wrap: wrap;
+    }
+
+    .btn-serial-connect {
+      background: #7a1f1d;
+      color: #ffd2cf;
+      border: 1px solid #c93b3b;
+      padding: var(--s2) var(--s4);
+      border-radius: var(--r-full);
+      font-weight: 600;
+      font-size: var(--t-xs);
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: var(--s2);
-      padding: var(--s2) var(--s3);
-      background: var(--ink-850);
-      border: 1px solid var(--copper);
-      border-radius: var(--r-full);
-      font-size: var(--t-xs);
-      color: var(--copper);
+      transition: 0.2s var(--ease);
+      user-select: none;
+    }
+
+    .btn-serial-connect.connected {
+      background: #17381e;
+      color: #92e6a7;
+      border-color: #2b823e;
+    }
+
+    .btn-serial-connect:hover {
+      filter: brightness(1.15);
     }
 
     .identity-dot {
@@ -450,6 +484,23 @@
       Your browser does not support Web Serial API.
     </div>
 
+    <!-- Global Top Persistent Bar -->
+    <div class="status-bar">
+      <div class="status-group">
+        <button id="btn-top-serial" class="btn-serial-connect">
+          <span class="status-led" id="top-serial-led" style="background: #ef4444;"></span>
+          <span id="top-serial-text">Connect Serial (Disconnected)</span>
+        </button>
+      </div>
+
+      <div class="status-group">
+        <div class="hardware-identity" id="top-firmware-badge" style="border-color: var(--line); color: var(--paper);">
+          <span class="identity-dot" id="top-firmware-dot" style="background: var(--warning);"></span>
+          <span>Firmware: <strong id="top-firmware-text" style="color: var(--warning);">Not Verified</strong></span>
+        </div>
+      </div>
+    </div>
+
     <div class="main-grid">
       <nav class="step-rail">
         <div class="step-list">
@@ -478,19 +529,13 @@
           <h2 class="step-title">Inspect Device</h2>
           <p class="step-instruction">
             Ensure your SlimeVR BMI160 tracker is connected to this computer via USB.
-            The device should appear as a serial port in your system.
+            Click <strong>Connect Serial</strong> above to link your tracker port.
           </p>
 
           <div class="action-area">
-            <p>Connected device:</p>
-            <div class="hardware-identity" id="device-identity">
-              <span class="identity-dot"></span>
-              <span class="device-id">Unknown</span>
-            </div>
-            <div style="display: flex; gap: var(--s3); margin-top: var(--s4); flex-wrap: wrap;">
-              <button id="btn-inspect" class="btn-primary" style="max-width: 200px;">Check Connection</button>
-              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 180px; background: var(--ink-800); border: 1px solid var(--line); color: var(--paper);">Next: Flash →</button>
-              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 180px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);">Skip to WiFi Setup ⚡</button>
+            <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
+              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 200px;">Next: Flash Firmware →</button>
+              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 200px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);">Skip to WiFi Setup ⚡</button>
             </div>
           </div>
 
@@ -540,21 +585,6 @@
           </p>
 
           <div class="action-area">
-            <div style="display: flex; gap: var(--s4); margin-bottom: var(--s4); flex-wrap: wrap;">
-              <div class="hardware-identity" id="serial-badge">
-                <span class="identity-dot" style="background: var(--muted);"></span>
-                <span>Serial: <strong id="serial-status-text">Disconnected</strong></span>
-              </div>
-              <div class="hardware-identity" id="firmware-badge">
-                <span class="identity-dot" style="background: var(--muted);"></span>
-                <span>Firmware: <strong id="flash-status-text">Not Flashed Yet</strong></span>
-              </div>
-            </div>
-
-            <div style="display: flex; gap: var(--s3); margin-bottom: var(--s4); flex-wrap: wrap;">
-              <button id="btn-manual-connect-serial" class="btn-primary" style="max-width: 220px; background: var(--signal-dark); color: var(--signal); border: 1px solid var(--signal);">🔌 Connect USB Serial</button>
-            </div>
-
             <div class="wifi-form" id="wifi-form">
               <div class="form-group">
                 <label for="wifi-ssid">WiFi Network Name (SSID)</label>
@@ -575,7 +605,7 @@
               </div>
 
               <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
-                <button id="btn-connect-wifi" class="btn-primary">Connect WiFi</button>
+                <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
                 <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
                 <button id="btn-back-to-flash" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
               </div>
@@ -653,29 +683,36 @@
     let isFirmwareFlashed = false;
 
     function updateSerialStatus(connected, portInfo = '') {
-      const badge = document.getElementById('serial-badge');
-      const dot = badge?.querySelector('.identity-dot');
-      const text = document.getElementById('serial-status-text');
+      const btn = document.getElementById('btn-top-serial');
+      const led = document.getElementById('top-serial-led');
+      const text = document.getElementById('top-serial-text');
       if (connected) {
-        if (dot) dot.style.background = 'var(--success)';
-        if (text) text.textContent = portInfo ? `Connected (${portInfo})` : 'Connected';
+        btn?.classList.add('connected');
+        if (led) led.style.background = 'var(--success)';
+        if (text) text.textContent = portInfo ? `Serial: Connected (${portInfo})` : 'Serial: Connected';
       } else {
-        if (dot) dot.style.background = 'var(--danger)';
-        if (text) text.textContent = 'Disconnected';
+        btn?.classList.remove('connected');
+        if (led) led.style.background = '#ef4444';
+        if (text) text.textContent = 'Connect Serial (Disconnected)';
       }
     }
 
     function updateFirmwareStatus(flashed) {
       isFirmwareFlashed = flashed;
-      const badge = document.getElementById('firmware-badge');
-      const dot = badge?.querySelector('.identity-dot');
-      const text = document.getElementById('flash-status-text');
+      const dot = document.getElementById('top-firmware-dot');
+      const text = document.getElementById('top-firmware-text');
       if (flashed) {
         if (dot) dot.style.background = 'var(--success)';
-        if (text) text.textContent = 'Flashed (Ready)';
+        if (text) {
+          text.textContent = 'Flashed (Ready)';
+          text.style.color = 'var(--success)';
+        }
       } else {
         if (dot) dot.style.background = 'var(--warning)';
-        if (text) text.textContent = 'Not Verified';
+        if (text) {
+          text.textContent = 'Not Verified';
+          text.style.color = 'var(--warning)';
+        }
       }
     }
 
@@ -689,30 +726,24 @@
         }
       } catch(e) {}
 
-      let ports = await navigator.serial.getPorts();
-      if (ports.length > 0) {
-        activePort = ports[0];
-        try {
-          await activePort.open({ baudRate: 115200 });
-          updateSerialStatus(true, 'Auto-detected');
-          return activePort;
-        } catch (err) {
-          logToWifiLog('Could not auto-open previous port, requesting user selection...', 'warn');
-        }
-      }
-
-      logToWifiLog('Please select your ESP32 tracker serial port in the browser popup...', 'info');
+      logToWifiLog('Opening serial port picker. Please select your tracker port...', 'info');
       activePort = await navigator.serial.requestPort();
       await activePort.open({ baudRate: 115200 });
-      updateSerialStatus(true, 'User-selected');
+      updateSerialStatus(true, 'Ready');
       return activePort;
     }
 
-    document.getElementById('btn-manual-connect-serial')?.addEventListener('click', async () => {
+    document.getElementById('btn-top-serial')?.addEventListener('click', async () => {
       try {
-        logToWifiLog('Connecting to serial port...', 'info');
+        if (activePort && activePort.readable) {
+          try { await activePort.close(); } catch(e) {}
+          activePort = null;
+          updateSerialStatus(false);
+          logToWifiLog('Serial port disconnected.', 'info');
+          return;
+        }
         await ensureSerialPort();
-        logToWifiLog('Serial connected successfully! Ready to set WiFi.', 'success');
+        logToWifiLog('Serial connected! You can now send WiFi credentials.', 'success');
       } catch (err) {
         logToWifiLog('Serial connection error: ' + err.message, 'error');
         updateSerialStatus(false);
