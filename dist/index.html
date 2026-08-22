@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SlimeVR BMI160 Firmware Installer</title>
+  <meta name="description" content="Flash and configure SlimeVR BMI160 tracker firmware">
+  <script src="app.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <h1>SlimeVR BMI160</h1>
+        <small>Firmware Installer</small>
+      </div>
+    </header>
+    <div id="browser-warning" class="browser-warning">
+      <strong>Browser not supported:</strong> This tool requires Google Chrome or Microsoft Edge on Windows. 
+      Your browser does not support Web Serial API.
+    </div>
+    <div class="status-bar">
+      <div class="status-group">
+        <button id="btn-top-serial" class="btn-serial-connect">
+          <span class="status-led" id="top-serial-led" style="background: var(--danger);"></span>
+          <span id="top-serial-text">Connect Serial (Disconnected)</span>
+        </button>
+      </div>
+      <div class="status-group">
+        <div class="hardware-identity" id="top-firmware-badge" style="border-color: var(--line); color: var(--paper);">
+          <span class="identity-dot" id="top-firmware-dot" style="background: var(--warning);"></span>
+          <span>Firmware: <strong id="top-firmware-text" style="color: var(--warning);">Not Verified</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="main-grid">
+      <nav class="step-rail">
+        <div class="step-list">
+          <div class="step-item active" data-step="0">
+            <span class="step-number">01</span>
+            <span>Inspect Device</span>
+          </div>
+          <div class="step-item" data-step="1">
+            <span class="step-number">02</span>
+            <span>Flash Firmware</span>
+          </div>
+          <div class="step-item" data-step="2">
+            <span class="step-number">03</span>
+            <span>WiFi Setup</span>
+          </div>
+          <div class="step-item" data-step="3">
+            <span class="step-number">04</span>
+            <span>Verify</span>
+          </div>
+          <div class="step-item" data-step="4">
+            <span class="step-number">05</span>
+            <span>Serial Log</span>
+          </div>
+        </div>
+      </nav>
+      <main id="app-content">
+        <section id="step-0" class="step-content">
+          <h2 class="step-title">Inspect Device</h2>
+          <p class="step-instruction">
+            Ensure your SlimeVR BMI160 tracker is connected to this computer via USB.
+            Click <strong>Connect Serial</strong> above to link your tracker port.
+            Use the step rail on the left to navigate.
+          </p>
+          <details>
+            <summary>Troubleshooting</summary>
+            <ul class="recovery-list">
+              <li>Install CH340/CP2102 USB driver if device not detected</li>
+              <li>Try different USB cable (must support data transfer)</li>
+              <li>Check Device Manager for COM port assignment</li>
+              <li>Close PlatformIO/Serial Monitor if open</li>
+            </ul>
+          </details>
+        </section>
+        <section id="step-1" class="step-content hidden">
+          <h2 class="step-title">Flash Firmware</h2>
+          <p class="step-instruction">
+            This will flash the generic SlimeVR BMI160 firmware to your tracker.
+            Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation will be preserved.
+          </p>
+          <div class="action-area">
+            <button id="btn-flash-firmware" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;">
+              ⚡ Flash SlimeVR BMI160 Tracker
+            </button>
+            <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
+          </div>
+          <p class="step-instruction" style="font-size: var(--t-sm);">
+            <strong>Note:</strong> After flashing, the device will reboot. Wait for the serial port to reappear before proceeding to WiFi setup.
+          </p>
+        </section>
+        <section id="step-2" class="step-content hidden">
+          <h2 class="step-title">WiFi Setup</h2>
+          <p class="step-instruction">
+            Enter your WiFi credentials. They will be sent directly to your tracker over USB serial.
+            Credentials are never sent to GitHub or any server.
+          </p>
+          <div class="action-area">
+            <div class="wifi-form" id="wifi-form">
+              <div class="form-group">
+                <label for="wifi-ssid">WiFi Network Name (SSID)</label>
+                <div class="input-wrapper">
+                  <input type="text" id="wifi-ssid" class="form-input" placeholder="e.g., HomeWiFi" autocomplete="off" spellcheck="false">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="wifi-password">Password</label>
+                <div class="input-wrapper">
+                  <input type="password" id="wifi-password" class="form-input" placeholder="Enter password" autocomplete="new-password">
+                  <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">👁️</button>
+                </div>
+                <p style="font-size: var(--t-xs); color: var(--muted); margin-top: var(--s1);">
+                  Required: 8-63 characters for WPA/WPA2 networks
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
+                <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
+                <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
+              </div>
+            </div>
+          </div>
+          <div id="wifi-status" class="status-log">
+            <div class="status-line">Waiting for WiFi credentials...</div>
+          </div>
+        </section>
+        <section id="step-3" class="step-content hidden">
+          <h2 class="step-title">Verify</h2>
+          <p class="step-instruction">
+            Your tracker is now configured. Wait for it to connect to WiFi and appear in SlimeVR Server.
+          </p>
+          <div class="action-area">
+            <div class="status-log" id="verify-log">
+              <div class="status-line success">WiFi credentials accepted</div>
+              <div class="status-line wait">Waiting for connection...</div>
+            </div>
+            <p id="verify-result" style="margin-top: var(--s3); font-weight: 600;"></p>
+          </div>
+          <div class="action-area">
+            <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Next Steps</h3>
+            <ul style="list-style: none; font-size: var(--t-base);">
+              <li>1. Open SlimeVR Server</li>
+              <li>2. Wait for tracker to appear</li>
+              <li>3. Complete sensor calibration if prompted</li>
+            </ul>
+          </div>
+          <button id="btn-reset" class="btn-primary" style="max-width: 200px; background: var(--ink-850);">Start Over</button>
+        </section>
+        <section id="step-4" class="step-content hidden">
+          <h2 class="step-title">Serial Log</h2>
+          <p class="step-instruction">
+            Live stream from your tracker's USB serial port. Useful for debugging boot,
+            WiFi, IMU, or SlimeVR protocol output.
+          </p>
+          <div class="action-area">
+            <div style="display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center;">
+              <button id="btn-log-connect" class="btn-primary" style="max-width: 200px;">Start Streaming</button>
+              <button id="btn-log-clear" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">Clear</button>
+              <label style="display: flex; gap: var(--s2); align-items: center; font-size: var(--t-sm); color: var(--muted);">
+                <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
+              </label>
+              <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
+            </div>
+            <pre id="live-log" style="margin-top: var(--s4); background: var(--ink-950); border: 1px solid var(--line); border-radius: 8px; padding: var(--s3); max-height: 50vh; overflow-y: auto; font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: var(--paper); white-space: pre-wrap; word-break: break-all;">// Serial log will appear here once streaming starts.
+            //</pre>
+          </div>
+          <div class="action-area">
+            <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
+            <ul style="list-style: none; font-size: var(--t-base); color: var(--muted);">
+              <li>115200 baud is used to match the firmware default.</li>
+              <li>If the port is already open in another tab, close it first.</li>
+              <li>Re-plug the tracker if you see no output after pressing Start.</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    <footer class="footer">
+      <div>
+        <strong>Privacy:</strong> All WiFi credentials remain in browser memory and travel only over local USB serial.
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/juarendra/SlimeVR-BMI160" target="_blank">Source Code</a>
+        <span>|</span>
+        <a href="https://docs.slimevr.dev/" target="_blank">Documentation</a>
+        <span>|</span>
+        <span id="firmware-version">v0.4.0</span>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <script type="module">
+    import 'https://unpkg.com/esp-web-tools@10/dist/web/install-dialog-im156JnI.js?module';
+    customElements.whenDefined('ewt-install-dialog').then(() => {
+      const Cls = customElements.get('ewt-install-dialog');
+      if (!Cls || Cls.__flashPatched) return;
+      Cls.__flashPatched = true;
+      const origUpdated = Cls.prototype.updated;
+      Cls.prototype.updated = function (changedProps) {
+        if (origUpdated) origUpdated.call(this, changedProps);
+        const root = this.shadowRoot;
+        if (!root) return;
+        queueMicrotask(() => {
+          if (!this.shadowRoot) return;
+          const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode())) {
+            if (node.nodeValue && node.nodeValue.includes('Install SlimeVR BMI160 Tracker')) {
+              node.nodeValue = node.nodeValue.replaceAll('Install SlimeVR BMI160 Tracker', 'Flash SlimeVR BMI160 Tracker');
+            }
+          }
+        });
+      };
+      const origConfirm = Cls.prototype._confirmInstall;
+      Cls.prototype._confirmInstall = async function () {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        console.log('[Flash] _confirmInstall called');
+        try {
+          if (this.port) {
+            console.log('[Flash] Step 1: manual reset sequence (port open already)');
+            try {
+              await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
+              await sleep(120);
+              console.log('[Flash] Step 1a: DTR=false, RTS=true');
+              await this.port.setSignals({ dataTerminalReady: false, requestToSend: true });
+              await sleep(120);
+              console.log('[Flash] Step 1b: DTR=true, RTS=true');
+              await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
+              await sleep(120);
+              console.log('[Flash] Step 1c: DTR=true, RTS=false');
+              await this.port.setSignals({ dataTerminalReady: true, requestToSend: false });
+              await sleep(400);
+              console.log('[Flash] Step 1d: manual reset complete');
+            } catch (sigErr) {
+              console.warn('[Flash] Manual bootloader reset failed; falling back to library reset:', sigErr);
+            }
+          }
+        } catch (outerErr) {
+          console.warn('[Flash] Bootloader prep wrapper error (continuing):', outerErr);
+        }
+        console.log('[Flash] Calling original _confirmInstall');
+        try {
+          const result = await origConfirm.apply(this, arguments);
+          console.log('[Flash] Original _confirmInstall finished');
+          return result;
+        } catch (e) {
+          console.error('[Flash] Original _confirmInstall threw:', e);
+          throw e;
+        }
+      };
+    }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
