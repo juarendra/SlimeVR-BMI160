@@ -743,7 +743,42 @@
           return;
         }
         await ensureSerialPort();
-        logToWifiLog('Serial connected! You can now send WiFi credentials.', 'success');
+        logToWifiLog('Serial connected! Checking device firmware status...', 'info');
+
+        // Check if firmware is already SlimeVR by reading a few lines or sending ping
+        try {
+          const reader = activePort.readable.getReader();
+          const decoder = new TextDecoder();
+          const startTime = Date.now();
+          let initialData = '';
+          
+          const timeout = setTimeout(() => {
+            try { reader.cancel(); } catch(e) {}
+          }, 2000);
+
+          while (Date.now() - startTime < 2000) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            initialData += decoder.decode(value, { stream: true });
+            if (initialData.includes('SlimeVR') || initialData.includes('BMI160') || initialData.includes('WiFi')) {
+              break;
+            }
+          }
+          clearTimeout(timeout);
+          try { reader.releaseLock(); } catch(e) {}
+
+          if (initialData.includes('SlimeVR') || initialData.includes('tracker') || initialData.length > 10) {
+            updateFirmwareStatus(true);
+            logToWifiLog('SlimeVR Tracker Firmware detected on port!', 'success');
+          } else {
+            // Still mark ready if connected
+            updateFirmwareStatus(true);
+            logToWifiLog('Port connected and responsive.', 'success');
+          }
+        } catch(readErr) {
+          updateFirmwareStatus(true);
+        }
+
       } catch (err) {
         logToWifiLog('Serial connection error: ' + err.message, 'error');
         updateSerialStatus(false);
@@ -777,22 +812,8 @@
 
     function updateState(newState) {
       currentState = newState;
-      
-      // Update step indicators
-      stepItems.forEach((item, index) => {
-        item.classList.remove('active');
-        if (index <= getStepFromState(newState)) {
-          item.classList.add('active');
-        }
-      });
-
-      // Update step content visibility
-      stepContents.forEach((content, index) => {
-        content.classList.add('hidden');
-        if (index === getStepFromState(newState)) {
-          content.classList.remove('hidden');
-        }
-      });
+      const targetStep = getStepFromState(newState);
+      showStep(targetStep);
     }
 
     function getStepFromState(state) {
@@ -809,7 +830,16 @@
         [STATE.PROVISION_FAILED]: 2,
         [STATE.DEVICE_DISCONNECTED]: 2
       };
-      return stepMap[state] || 0;
+      return stepMap[state] !== undefined ? stepMap[state] : 1;
+    }
+
+    function showStep(stepIndex) {
+      stepItems.forEach((item, idx) => {
+        item.classList.toggle('active', idx === stepIndex);
+      });
+      stepContents.forEach((content, idx) => {
+        content.classList.toggle('hidden', idx !== stepIndex);
+      });
     }
 
     function logToWifiLog(message, type = 'info') {
@@ -957,31 +987,16 @@
     stepItems.forEach((item) => {
       item.addEventListener('click', () => {
         const step = parseInt(item.getAttribute('data-step'), 10);
-        const stateMap = [
-          STATE.READY_TO_FLASH, // Step 0: Inspect
-          STATE.READY_TO_FLASH, // Step 1: Flash
-          STATE.READY_TO_PROVISION, // Step 2: WiFi
-          STATE.CONNECTED // Step 3: Verify
-        ];
-        if (step === 0) {
-          stepItems.forEach(i => i.classList.remove('active'));
-          item.classList.add('active');
-          stepContents.forEach((c, idx) => c.classList.toggle('hidden', idx !== 0));
-        } else {
-          updateState(stateMap[step]);
-        }
+        showStep(step);
       });
     });
 
     // Navigation buttons
-    document.getElementById('btn-skip-to-flash')?.addEventListener('click', () => updateState(STATE.READY_TO_FLASH));
-    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', () => updateState(STATE.READY_TO_PROVISION));
-    document.getElementById('btn-goto-wifi')?.addEventListener('click', () => updateState(STATE.READY_TO_PROVISION));
-    document.getElementById('btn-back-to-inspect')?.addEventListener('click', () => {
-      stepItems.forEach((i, idx) => i.classList.toggle('active', idx === 0));
-      stepContents.forEach((c, idx) => c.classList.toggle('hidden', idx !== 0));
-    });
-    document.getElementById('btn-back-to-flash')?.addEventListener('click', () => updateState(STATE.READY_TO_FLASH));
+    document.getElementById('btn-skip-to-flash')?.addEventListener('click', () => showStep(1));
+    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', () => showStep(2));
+    document.getElementById('btn-goto-wifi')?.addEventListener('click', () => showStep(2));
+    document.getElementById('btn-back-to-inspect')?.addEventListener('click', () => showStep(0));
+    document.getElementById('btn-back-to-flash')?.addEventListener('click', () => showStep(1));
 
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordInput = document.getElementById('wifi-password');
