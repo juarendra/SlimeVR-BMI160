@@ -5,7 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SlimeVR BMI160 Firmware Installer</title>
   <meta name="description" content="Flash and configure SlimeVR BMI160 tracker firmware">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com; object-src 'none'; base-uri 'none';">
+  <script>
+    // Global immediate showStep function available before any module load
+    window.showStep = function(stepIndex) {
+      const items = document.querySelectorAll('.step-item');
+      const contents = document.querySelectorAll('.step-content');
+      items.forEach((item, idx) => {
+        item.classList.toggle('active', idx === stepIndex);
+      });
+      contents.forEach((content, idx) => {
+        content.classList.toggle('hidden', idx !== stepIndex);
+      });
+    };
+  </script>
   <style>
     :root {
       --ink-950: #0b0e0d;
@@ -504,19 +516,19 @@
     <div class="main-grid">
       <nav class="step-rail">
         <div class="step-list">
-          <div class="step-item active" data-step="0">
+          <div class="step-item active" data-step="0" onclick="window.showStep(0)">
             <span class="step-number">01</span>
             <span>Inspect Device</span>
           </div>
-          <div class="step-item" data-step="1">
+          <div class="step-item" data-step="1" onclick="window.showStep(1)">
             <span class="step-number">02</span>
             <span>Flash Firmware</span>
           </div>
-          <div class="step-item" data-step="2">
+          <div class="step-item" data-step="2" onclick="window.showStep(2)">
             <span class="step-number">03</span>
             <span>WiFi Setup</span>
           </div>
-          <div class="step-item" data-step="3">
+          <div class="step-item" data-step="3" onclick="window.showStep(3)">
             <span class="step-number">04</span>
             <span>Verify</span>
           </div>
@@ -534,8 +546,8 @@
 
           <div class="action-area">
             <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
-              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 200px;">Next: Flash Firmware →</button>
-              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 200px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);">Skip to WiFi Setup ⚡</button>
+              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 200px;" onclick="window.showStep(1)">Next: Flash Firmware →</button>
+              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 200px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);" onclick="window.showStep(2)">Skip to WiFi Setup ⚡</button>
             </div>
           </div>
 
@@ -566,8 +578,8 @@
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
             
             <div style="display: flex; gap: var(--s3); margin-top: var(--s5); border-top: 1px solid var(--line); padding-top: var(--s4); flex-wrap: wrap;">
-              <button id="btn-goto-wifi" class="btn-primary" style="max-width: 220px;">Proceed to WiFi Setup →</button>
-              <button id="btn-back-to-inspect" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
+              <button id="btn-goto-wifi" class="btn-primary" style="max-width: 220px;" onclick="window.showStep(2)">Proceed to WiFi Setup →</button>
+              <button id="btn-back-to-inspect" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);" onclick="window.showStep(0)">← Back</button>
             </div>
           </div>
 
@@ -607,7 +619,7 @@
               <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
                 <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
                 <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
-                <button id="btn-back-to-flash" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
+                <button id="btn-back-to-flash" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);" onclick="window.showStep(1)">← Back</button>
               </div>
             </div>
           </div>
@@ -833,13 +845,20 @@
       return stepMap[state] !== undefined ? stepMap[state] : 1;
     }
 
-    function showStep(stepIndex) {
-      stepItems.forEach((item, idx) => {
+    // Expose showStep globally for inline HTML onclick fallback
+    window.showStep = function(stepIndex) {
+      const items = document.querySelectorAll('.step-item');
+      const contents = document.querySelectorAll('.step-content');
+      items.forEach((item, idx) => {
         item.classList.toggle('active', idx === stepIndex);
       });
-      stepContents.forEach((content, idx) => {
+      contents.forEach((content, idx) => {
         content.classList.toggle('hidden', idx !== stepIndex);
       });
+    };
+
+    function showStep(stepIndex) {
+      window.showStep(stepIndex);
     }
 
     function logToWifiLog(message, type = 'info') {
@@ -983,20 +1002,35 @@
       }
     });
 
-    // Make Step rail clickable
-    stepItems.forEach((item) => {
+    // Setup navigation and step switching after DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.step-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          const step = parseInt(item.getAttribute('data-step'), 10);
+          showStep(step);
+        });
+      });
+
+      document.getElementById('btn-skip-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
+      document.getElementById('btn-skip-to-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
+      document.getElementById('btn-goto-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
+      document.getElementById('btn-back-to-inspect')?.addEventListener('click', (e) => { e.preventDefault(); showStep(0); });
+      document.getElementById('btn-back-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
+    });
+
+    // Also bind directly in case DOM is already ready
+    document.querySelectorAll('.step-item').forEach((item) => {
       item.addEventListener('click', () => {
         const step = parseInt(item.getAttribute('data-step'), 10);
         showStep(step);
       });
     });
 
-    // Navigation buttons
-    document.getElementById('btn-skip-to-flash')?.addEventListener('click', () => showStep(1));
-    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', () => showStep(2));
-    document.getElementById('btn-goto-wifi')?.addEventListener('click', () => showStep(2));
-    document.getElementById('btn-back-to-inspect')?.addEventListener('click', () => showStep(0));
-    document.getElementById('btn-back-to-flash')?.addEventListener('click', () => showStep(1));
+    document.getElementById('btn-skip-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
+    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
+    document.getElementById('btn-goto-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
+    document.getElementById('btn-back-to-inspect')?.addEventListener('click', (e) => { e.preventDefault(); showStep(0); });
+    document.getElementById('btn-back-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
 
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordInput = document.getElementById('wifi-password');
