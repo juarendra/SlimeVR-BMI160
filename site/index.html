@@ -762,29 +762,23 @@
         console.log('[Flash] _confirmInstall called');
         try {
           if (this.port) {
-            console.log('[Flash] Step 1: closing port');
-            try { await this.port.close(); } catch (e) { /* ignore */ }
-            console.log('[Flash] Step 2: opening port + manual reset sequence');
+            console.log('[Flash] Step 1: manual reset sequence (port open already)');
             try {
-              await this.port.open({ baudRate: 115200 });
-              console.log('[Flash] Step 2a: DTR=false, RTS=false');
               await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
               await sleep(120);
-              console.log('[Flash] Step 2b: DTR=false, RTS=true');
+              console.log('[Flash] Step 1a: DTR=false, RTS=true');
               await this.port.setSignals({ dataTerminalReady: false, requestToSend: true });
               await sleep(120);
-              console.log('[Flash] Step 2c: DTR=true, RTS=true');
+              console.log('[Flash] Step 1b: DTR=true, RTS=true');
               await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
               await sleep(120);
-              console.log('[Flash] Step 2d: DTR=true, RTS=false');
+              console.log('[Flash] Step 1c: DTR=true, RTS=false');
               await this.port.setSignals({ dataTerminalReady: true, requestToSend: false });
               await sleep(400);
-              console.log('[Flash] Step 2e: manual reset complete');
+              console.log('[Flash] Step 1d: manual reset complete');
             } catch (sigErr) {
               console.warn('[Flash] Manual bootloader reset failed; falling back to library reset:', sigErr);
             }
-            console.log('[Flash] Step 3: closing port before esptool');
-            try { await this.port.close(); } catch (e) { /* ignore */ }
           }
         } catch (outerErr) {
           console.warn('[Flash] Bootloader prep wrapper error (continuing):', outerErr);
