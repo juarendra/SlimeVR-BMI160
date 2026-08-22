@@ -1,6 +1,18 @@
+<<<<<<< HEAD
 import argparse
 import hashlib
 import json
+=======
+"""
+Site Prepare Pages - ESP32 firmware packaging for GitHub Pages
+Usage: python prepare_pages.py --build-dir <build> --site-dir <site> --output-dir <dist> --release-id <id>
+"""
+
+import argparse
+import hashlib
+import json
+import os
+>>>>>>> origin/main
 import shutil
 import subprocess
 import sys
@@ -8,6 +20,10 @@ from pathlib import Path
 
 
 def get_platformio_metadata(build_dir: Path) -> dict:
+<<<<<<< HEAD
+=======
+    """Extract flash parameters from PlatformIO build metadata."""
+>>>>>>> origin/main
     metadata_path = build_dir / ".pio" / "build" / "esp32" / "idedata.json"
     
     if not metadata_path.exists():
@@ -16,12 +32,21 @@ def get_platformio_metadata(build_dir: Path) -> dict:
     with open(metadata_path, 'r') as f:
         data = json.load(f)
     
+<<<<<<< HEAD
+=======
+    # Parse upload_flags to find flash parameters
+>>>>>>> origin/main
     upload_flags = data.get('upload_flags', [])
     flash_mode = 'dio'
     flash_freq = '40m'
     flash_size = '4MB'
     
     for flag in upload_flags:
+<<<<<<< HEAD
+=======
+        if flag.startswith('-D') and 'ARDUINO' in flag:
+            continue
+>>>>>>> origin/main
         if flag == '-fm':
             idx = upload_flags.index(flag)
             flash_mode = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else 'dio'
@@ -32,6 +57,19 @@ def get_platformio_metadata(build_dir: Path) -> dict:
             idx = upload_flags.index(flag)
             flash_size = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else '4MB'
     
+<<<<<<< HEAD
+=======
+    # Find binary offsets from build output
+    build_dir_esp32 = build_dir / ".pio" / "build" / "esp32"
+    bootloader = build_dir_esp32 / "bootloader.bin"
+    partitions = build_dir_esp32 / "partitions.bin"
+    firmware = build_dir_esp32 / "firmware.bin"
+    
+    # boot_app0.bin is optional in some configurations
+    boot_app0 = build_dir_esp32 / "boot_app0.bin"
+    
+    # Get offsets from platformio.ini or default
+>>>>>>> origin/main
     offsets = {
         'bootloader': 0x1000,
         'partitions': 0x8000,
@@ -40,6 +78,7 @@ def get_platformio_metadata(build_dir: Path) -> dict:
     }
     
     return {
+<<<<<<< HEAD
         'offsets': offsets,
         'flash_mode': flash_mode,
         'flash_freq': flash_freq,
@@ -53,6 +92,26 @@ def merge_firmware(binaries: list, output: Path, flash_params: dict) -> Path:
         '-fm', flash_params['flash_mode'],
         '-ff', flash_params['flash_freq'],
         '-fs', flash_params['flash_size'],
+=======
+        'bootloader': str(bootloader),
+        'partitions': str(partitions),
+        'boot_app0': str(boot_app0),
+        'firmware': str(firmware),
+        'flash_mode': flash_mode,
+        'flash_freq': flash_freq,
+        'flash_size': flash_size,
+        'offsets': offsets
+    }
+
+
+def merge_firmware(binaries: list, offsets: dict, output: Path, flash_params: dict) -> Path:
+    """Merge ESP32 binaries into single image using esptool."""
+    cmd = [
+        'esptool', '--chip', 'esp32', 'merge-bin',
+        f'-fm', flash_params['flash_mode'],
+        f'-ff', flash_params['flash_freq'],
+        f'-fs', flash_params['flash_size'],
+>>>>>>> origin/main
         '-o', str(output)
     ]
     
@@ -73,6 +132,10 @@ def merge_firmware(binaries: list, output: Path, flash_params: dict) -> Path:
 
 
 def compute_sha256(filepath: Path) -> str:
+<<<<<<< HEAD
+=======
+    """Compute SHA-256 hash of file."""
+>>>>>>> origin/main
     sha256 = hashlib.sha256()
     with open(filepath, 'rb') as f:
         for chunk in iter(lambda: f.read(8192), b''):
@@ -81,6 +144,10 @@ def compute_sha256(filepath: Path) -> str:
 
 
 def create_manifest(release_id: str, merged_path: str) -> dict:
+<<<<<<< HEAD
+=======
+    """Create ESP Web Tools compatible manifest."""
+>>>>>>> origin/main
     return {
         "name": "SlimeVR BMI160 Tracker",
         "version": release_id,
@@ -102,6 +169,7 @@ def create_manifest(release_id: str, merged_path: str) -> dict:
 
 
 def copy_assets(site_dir: Path, output_dir: Path, release_id: str):
+<<<<<<< HEAD
     for item in site_dir.iterdir():
         if item.is_file():
             shutil.copy2(item, output_dir / item.name)
@@ -111,6 +179,21 @@ def copy_assets(site_dir: Path, output_dir: Path, release_id: str):
     firmware_dir = output_dir / "firmware" / release_id
     firmware_dir.mkdir(parents=True, exist_ok=True)
     
+=======
+    """Copy site files and firmware to dist directory."""
+    # Copy static site files
+    for item in site_dir.iterdir():
+        if item.is_file():
+            shutil.copy2(item, output_dir / item.name)
+        elif item.is_dir() and item.name not in ['firmware', 'dist']:
+            shutil.copytree(item, output_dir / item.name, dirs_exist_ok=True)
+    
+    # Copy firmware binaries to versioned directory
+    firmware_dir = output_dir / "firmware" / release_id
+    firmware_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Copy merged binary and manifest
+>>>>>>> origin/main
     merged_bin = firmware_dir / "slimevr-bmi160-esp32-full.bin"
     manifest_path = output_dir / "manifest.json"
     
@@ -131,11 +214,19 @@ def main():
     output_dir = Path(args.output_dir)
     release_id = args.release_id
     
+<<<<<<< HEAD
+=======
+    # Validate paths
+>>>>>>> origin/main
     if not build_dir.exists():
         raise FileNotFoundError(f"Build directory not found: {build_dir}")
     if not site_dir.exists():
         raise FileNotFoundError(f"Site directory not found: {site_dir}")
     
+<<<<<<< HEAD
+=======
+    # Clean output
+>>>>>>> origin/main
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +234,7 @@ def main():
     print(f"Building release: {release_id}")
     print(f"Output directory: {output_dir}")
     
+<<<<<<< HEAD
     print("Extracting PlatformIO metadata...")
     metadata = get_platformio_metadata(build_dir)
     
@@ -179,13 +271,40 @@ def main():
     if not binaries:
         raise FileNotFoundError("No firmware binaries found")
     
+=======
+    # Get PlatformIO metadata
+    print("Extracting PlatformIO metadata...")
+    metadata = get_platformio_metadata(build_dir)
+    
+    # Verify binaries exist (boot_app0.bin is optional)
+    binaries_to_check = ['bootloader', 'partitions', 'firmware']
+    for key in binaries_to_check:
+        bin_path = metadata[key]
+        if not Path(bin_path).exists():
+            raise FileNotFoundError(f"Binary not found: {bin_path}")
+    
+    # Create firmware output directory
+>>>>>>> origin/main
     firmware_dir = output_dir / "firmware" / release_id
     firmware_dir.mkdir(parents=True, exist_ok=True)
     
     merged_bin = firmware_dir / "slimevr-bmi160-esp32-full.bin"
     
     print("Merging firmware binaries...")
+<<<<<<< HEAD
     merge_firmware(binaries, merged_bin, metadata)
+=======
+    binaries = [
+        {'path': metadata['bootloader'], 'offset': metadata['offsets']['bootloader']},
+        {'path': metadata['partitions'], 'offset': metadata['offsets']['partitions']},
+        {'path': metadata['firmware'], 'offset': metadata['offsets']['firmware']}
+    ]
+    
+    if metadata.get('boot_app0') and Path(metadata['boot_app0']).exists():
+        binaries.insert(2, {'path': metadata['boot_app0'], 'offset': metadata['offsets']['boot_app0']})
+    
+    merge_firmware(binaries, metadata['offsets'], merged_bin, metadata)
+>>>>>>> origin/main
     
     print("Computing checksum...")
     sha256 = compute_sha256(merged_bin)

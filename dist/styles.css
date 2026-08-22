@@ -5,6 +5,7 @@
 }
 
 :root {
+<<<<<<< HEAD
     --bg-dark: #0a0b0c;
     --bg-panel: #111315;
     --bg-panel-light: #181b1e;
@@ -15,6 +16,18 @@
     --accent-copper: #b87333;
     --accent-copper-dim: #8a5a2b;
     --border-color: #2a2e33;
+=======
+    --bg-dark: #0f0f0f;
+    --bg-panel: #1a1a1a;
+    --bg-panel-light: #242424;
+    --text-primary: #e8e8e8;
+    --text-secondary: #a0a0a0;
+    --accent-positron: #00d9ff;
+    --accent-positron-dim: #009db5;
+    --accent-steel: #7d8a95;
+    --accent-steel-dim: #5a656f;
+    --border-color: #3a3a3a;
+>>>>>>> origin/main
     --danger: #ff4757;
     --success: #2ed573;
     --font-mono: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -27,11 +40,22 @@ html {
 
 body {
     background-color: var(--bg-dark);
+<<<<<<< HEAD
+=======
+    background-image: url('../DOC/positron.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+>>>>>>> origin/main
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+<<<<<<< HEAD
+=======
+    position: relative;
+>>>>>>> origin/main
 }
 
 body::before {
@@ -41,10 +65,14 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     background-image: 
         linear-gradient(rgba(204, 255, 0, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(204, 255, 0, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
+=======
+    background: radial-gradient(circle at center, rgba(26, 26, 26, 0.85) 0%, rgba(15, 15, 15, 0.95) 100%);
+>>>>>>> origin/main
     z-index: -1;
     pointer-events: none;
 }
@@ -61,6 +89,13 @@ body::before {
     padding: 1.5rem 2rem;
     position: relative;
     overflow: hidden;
+<<<<<<< HEAD
+=======
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
+>>>>>>> origin/main
 }
 
 .header::after {
@@ -70,13 +105,32 @@ body::before {
     left: 0;
     width: 100%;
     height: 2px;
+<<<<<<< HEAD
     background: linear-gradient(90deg, transparent, var(--accent-copper), transparent);
+=======
+    background: linear-gradient(90deg, transparent, var(--accent-positron), transparent);
+}
+
+.header .title::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url('../DOC/logo_positron.png') no-repeat center center;
+    background-size: contain;
+    margin-right: 12px;
+    vertical-align: middle;
+>>>>>>> origin/main
 }
 
 .title {
     font-size: 1.75rem;
     font-weight: 700;
+<<<<<<< HEAD
     color: var(--accent-lime);
+=======
+    color: var(--accent-positron);
+>>>>>>> origin/main
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -85,6 +139,10 @@ body::before {
     color: var(--text-secondary);
     font-size: 0.95rem;
     margin-top: 0.25rem;
+<<<<<<< HEAD
+=======
+    font-family: var(--font-mono);
+>>>>>>> origin/main
 }
 
 .main {
@@ -106,6 +164,26 @@ body::before {
     flex-direction: column;
     gap: 1.5rem;
     padding-left: 0.5rem;
+<<<<<<< HEAD
+=======
+    position: relative;
+}
+
+.step-rail::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 32px;
+    bottom: -0.5rem;
+    width: 1px;
+    background: 
+        linear-gradient(to bottom, var(--accent-steel-dim) 50%, transparent 50%),
+        linear-gradient(to bottom, transparent 45%, var(--accent-positron-dim) 50%, transparent 55%),
+        linear-gradient(to bottom, var(--accent-steel-dim) 50%, transparent 50%);
+    background-size: 1px 16px, 1px 32px, 1px 16px;
+    background-position: 0 0, 0 0, 0 0;
+    opacity: 0.7;
+>>>>>>> origin/main
 }
 
 .step {
@@ -122,31 +200,51 @@ body::before {
 }
 
 .step.completed .step-icon {
+<<<<<<< HEAD
     background: var(--success);
     border-color: var(--success);
+=======
+    background: var(--accent-steel);
+    border-color: var(--accent-steel);
+>>>>>>> origin/main
     color: #000;
 }
 
 .step.active .step-icon {
+<<<<<<< HEAD
     background: var(--accent-lime);
     border-color: var(--accent-lime);
     color: #000;
     box-shadow: 0 0 0 4px rgba(204, 255, 0, 0.1);
+=======
+    background: var(--accent-positron);
+    border-color: var(--accent-positron);
+    color: #000;
+    box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1);
+>>>>>>> origin/main
 }
 
 .step-icon {
     width: 28px;
     height: 28px;
+<<<<<<< HEAD
     border-radius: 6px;
     border: 1px solid var(--accent-copper);
     background: var(--bg-panel-light);
     color: var(--accent-copper);
+=======
+    border-radius: 4px;
+    border: 1px solid var(--accent-steel);
+    background: var(--bg-panel-light);
+    color: var(--accent-steel);
+>>>>>>> origin/main
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
     font-weight: 700;
     transition: all 0.3s ease;
+<<<<<<< HEAD
 }
 
 .step-label {
@@ -154,6 +252,38 @@ body::before {
     color: var(--text-secondary);
     font-weight: 500;
     transition: color 0.3s ease;
+=======
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.step-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    box-shadow: 0 0 0 0 var(--accent-steel-dim);
+    transition: all 0.3s ease;
+}
+
+.step-label::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent-positron);
+    transition: width 0.3s ease;
+}
+
+.step.active .step-label::after,
+.step.completed .step-label::after {
+    width: 100%;
+>>>>>>> origin/main
 }
 
 .step.active .step-label,
@@ -196,7 +326,11 @@ body::before {
     left: 0;
     width: 4px;
     height: 100%;
+<<<<<<< HEAD
     background: linear-gradient(to bottom, var(--accent-copper), var(--accent-lime));
+=======
+    background: linear-gradient(to bottom, var(--accent-steel), var(--accent-positron));
+>>>>>>> origin/main
 }
 
 .section {
@@ -216,9 +350,15 @@ body::before {
     content: '';
     width: 4px;
     height: 24px;
+<<<<<<< HEAD
     background: var(--accent-lime);
     border-radius: 2px;
     box-shadow: 0 0 8px rgba(204, 255, 0, 0.4);
+=======
+    background: var(--accent-positron);
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(0, 217, 255, 0.4);
+>>>>>>> origin/main
 }
 
 .section-desc {
@@ -251,6 +391,7 @@ body::before {
 }
 
 .btn-primary {
+<<<<<<< HEAD
     background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-dim));
     color: #000;
     box-shadow: 0 4px 12px rgba(204, 255, 0, 0.2);
@@ -258,6 +399,15 @@ body::before {
 
 .btn-primary:hover:not(:disabled) {
     box-shadow: 0 6px 16px rgba(204, 255, 0, 0.3);
+=======
+    background: linear-gradient(135deg, var(--accent-positron), var(--accent-positron-dim));
+    color: #000;
+    box-shadow: 0 4px 12px rgba(0, 217, 255, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(0, 217, 255, 0.3);
+>>>>>>> origin/main
     transform: translateY(-1px);
 }
 
@@ -314,8 +464,13 @@ body::before {
 
 .form-input:focus {
     outline: none;
+<<<<<<< HEAD
     border-color: var(--accent-lime);
     box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.1);
+=======
+    border-color: var(--accent-positron);
+    box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.1);
+>>>>>>> origin/main
 }
 
 .form-input::placeholder {
@@ -339,7 +494,11 @@ body::before {
 
 .identity-title {
     font-size: 0.8rem;
+<<<<<<< HEAD
     color: var(--accent-lime);
+=======
+    color: var(--accent-positron);
+>>>>>>> origin/main
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 0.75rem;
@@ -365,7 +524,11 @@ body::before {
 }
 
 .identity-details .value {
+<<<<<<< HEAD
     color: var(--accent-lime);
+=======
+    color: var(--accent-positron);
+>>>>>>> origin/main
     font-family: var(--font-mono);
 }
 
@@ -394,8 +557,13 @@ body::before {
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
+<<<<<<< HEAD
     background: var(--accent-lime);
     border-color: var(--accent-lime);
+=======
+    background: var(--accent-positron);
+    border-color: var(--accent-positron);
+>>>>>>> origin/main
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
@@ -431,9 +599,15 @@ body::before {
 }
 
 .status-msg.info {
+<<<<<<< HEAD
     background: rgba(46, 213, 115, 0.1);
     border: 1px solid var(--success);
     color: var(--success);
+=======
+    background: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--accent-positron);
+    color: var(--accent-positron);
+>>>>>>> origin/main
 }
 
 .status-msg.warning {
@@ -470,8 +644,13 @@ body::before {
 }
 
 .complete-icon {
+<<<<<<< HEAD
     color: var(--success);
     text-shadow: 0 0 20px rgba(46, 213, 115, 0.3);
+=======
+    color: var(--accent-positron);
+    text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+>>>>>>> origin/main
 }
 
 .error-icon {
@@ -507,8 +686,13 @@ body::before {
 }
 
 .banner-warning {
+<<<<<<< HEAD
     background: rgba(255, 165, 0, 0.1);
     border: 1px solid #ffa500;
+=======
+    background: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--accent-positron);
+>>>>>>> origin/main
 }
 
 .banner-content h3 {
@@ -532,6 +716,19 @@ body::before {
     margin-top: 1rem;
 }
 
+<<<<<<< HEAD
+=======
+@keyframes attention-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--signal); transform: scale(1); }
+    50% { box-shadow: 0 0 0 8px rgba(155, 255, 0, 0.25); transform: scale(1.04); }
+}
+
+.attention-pulse {
+    animation: attention-pulse 0.6s ease-in-out 3;
+    z-index: 10;
+}
+
+>>>>>>> origin/main
 .footer {
     background: var(--bg-panel);
     border-top: 1px solid var(--border-color);
@@ -576,7 +773,11 @@ body::before {
         -webkit-overflow-scrolling: touch;
     }
 
+<<<<<<< HEAD
     .step::before {
+=======
+    .step-rail::before {
+>>>>>>> origin/main
         display: none;
     }
 }

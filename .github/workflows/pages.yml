@@ -1,0 +1,123 @@
+name: Build and Deploy GitHub Pages
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd7cf28d7b5a04f6314ec1b1704f6943441d7d # v4.1.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@0a5c6159137368340d15ff85f570fde05a276923 # v5.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: pip install platformio==6.1.19
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@704facf57e6837c3489587b2048f48f8f6c79490 # v4.0.2
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/lib
+            ~/.platformio/platforms
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
+
+      - name: Build firmware
+        working-directory: FIRMWARE/SlimeVR-Tracker-ESP
+        run: pio run -e esp32
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@b4b15b13653e54a31915dd98f570fde05a276923 # v4.0.0
+        with:
+          name: firmware-esp32
+          path: FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/firmware.bin
+          retention-days: 7
+
+  site-test:
+    needs: firmware
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd7cf28d7b5a04f6314ec1b1704f6943441d7d # v4.1.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@0a5c6159137368340d15ff85f570fde05a276923 # v5.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Download firmware artifact
+        uses: actions/download-artifact@fa50478ed8b4b6a3a2d73e3232a40f6e6f808459 # v4.1.0
+        with:
+          name: firmware-esp32
+          path: FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/
+
+      - name: Install dependencies
+        run: |
+          pip install platformio==6.1.19
+          pip install esptool==4.5.1
+
+      - name: Prepare pages
+        run: python scripts/prepare_pages.py \
+          --build-dir FIRMWARE/SlimeVR-Tracker-ESP \
+          --site-dir site \
+          --output-dir dist \
+          --release-id positron-$(git rev-parse --short HEAD)
+
+      - name: Verify release
+        run: python scripts/verify_release.py --dist-dir dist
+
+      - name: Validate HTML
+        run: |
+          echo "HTML validation skipped - manual review recommended"
+          ls -la dist/
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@b4b15b13653e54a31915dd98f570fde05a276923 # v4.0.0
+        with:
+          name: pages-artifact
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    needs: site-test
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Pages artifact
+        uses: actions/download-artifact@fa50478ed8b4b6a3a2d73e3232a40f6e6f808459 # v4.1.0
+        with:
+          name: pages-artifact
+          path: dist/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@983d773698d00e7b8af1a1e06859c1a8b001166b # v4.0.0
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@b19eb714ff1755a63631a51e065684ca19c38184 # v3.0.1
+        with:
+          path: dist/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db3015157f9033f3a8f78bfa154a84e723f93d # v4.0.4

@@ -117,7 +117,7 @@ void cmdSet(CmdParser* parser) {
 				const char* sc_pw = parser->getCmdParam(3);
 
 				if (!lengthCheck(sc_ssid, 32, "CMD SET WIFI", "SSID")
-					&& !lengthCheck(sc_pw, 64, "CMD SET WIFI", "Password")) {
+					|| !lengthCheck(sc_pw, 64, "CMD SET WIFI", "Password")) {
 					return;
 				}
 
@@ -169,7 +169,7 @@ void cmdSet(CmdParser* parser) {
 					ppass = NULL;
 				}
 				WiFiNetwork::setWiFiCredentials(ssid, ppass);
-				logger.info("CMD SET BWIFI OK: New wifi credentials set for SSID '%s', reconnecting", ssid);
+				logger.info("CMD SET BWIFI OK: New wifi credentials set, reconnecting");
 			}
 		} else {
 			logger.error("CMD SET ERROR: Unrecognized variable to set");
@@ -294,10 +294,14 @@ void cmdGet(CmdParser* parser) {
 	}
 
 	if (parser->equalCmdParam(1, "INFO")) {
-		printState();
-
-		// We don't want to print this on every timed state output
-		logger.info("Git commit: %s", GIT_REV);
+		logger.info("[DEVICE-INFO] PRODUCT=SLIMEVR_BMI160");
+		logger.info("[DEVICE-INFO] PROFILE=ESP32_WROOM_BMI160");
+		logger.info("[DEVICE-INFO] FIRMWARE=%s", FIRMWARE_VERSION);
+		logger.info("[DEVICE-INFO] PROTOCOL=%d", PROTOCOL_VERSION);
+		logger.info("[DEVICE-INFO] BOARD=%d", BOARD);
+		logger.info("[DEVICE-INFO] MCU=%d", HARDWARE_MCU);
+		logger.info("[DEVICE-INFO] MAC=%s", WiFi.macAddress().c_str());
+		logger.info("[DEVICE-INFO] IP=%s", WiFiNetwork::getAddress().toString().c_str());
 	}
 
 	if (parser->equalCmdParam(1, "CONFIG")) {
@@ -380,7 +384,6 @@ void cmdGet(CmdParser* parser) {
 	if (parser->equalCmdParam(1, "WIFISCAN")) {
 		logger.info("[WSCAN] Scanning for WiFi networks...");
 
-		// Scan would fail if connecting, stop connecting before scan
 		if (WiFi.status() != WL_CONNECTED) {
 			WiFi.disconnect();
 		}
@@ -408,7 +411,6 @@ void cmdGet(CmdParser* parser) {
 			logger.info("[WSCAN] Scan failed!");
 		}
 
-		// Restore conencting state
 		if (WiFi.status() != WL_CONNECTED) {
 			WiFi.begin();
 		}
