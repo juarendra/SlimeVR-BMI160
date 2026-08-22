@@ -535,6 +535,10 @@
             <span class="step-number">04</span>
             <span>Verify</span>
           </div>
+          <div class="step-item" data-step="4">
+            <span class="step-number">05</span>
+            <span>Serial Log</span>
+          </div>
         </div>
       </nav>
 
@@ -657,6 +661,53 @@
           </div>
 
           <button id="btn-reset" class="btn-primary" style="max-width: 200px; background: var(--ink-850);">Start Over</button>
+        </section>
+
+        <!-- Step 4: Serial Log -->
+        <section id="step-4" class="step-content hidden">
+          <h2 class="step-title">Serial Log</h2>
+          <p class="step-instruction">
+            Live stream from your tracker's USB serial port. Useful for debugging boot,
+            WiFi, IMU, or SlimeVR protocol output. The stream is read-only; no commands
+            are sent here (use the WiFi Setup step for provisioning).
+          </p>
+
+          <div class="action-area">
+            <div style="display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center;">
+              <button id="btn-log-connect" class="btn-primary" style="max-width: 200px;">Start Streaming</button>
+              <button id="btn-log-clear" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">Clear</button>
+              <label style="display: flex; gap: var(--s2); align-items: center; font-size: var(--t-sm); color: var(--muted);">
+                <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
+              </label>
+              <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
+            </div>
+
+            <pre id="live-log" style="
+              margin-top: var(--s4);
+              background: var(--ink-950);
+              border: 1px solid var(--line);
+              border-radius: 8px;
+              padding: var(--s3);
+              max-height: 50vh;
+              overflow-y: auto;
+              font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+              font-size: 12px;
+              line-height: 1.5;
+              color: var(--paper);
+              white-space: pre-wrap;
+              word-break: break-all;
+            ">// Serial log will appear here once streaming starts.
+//</pre>
+          </div>
+
+          <div class="action-area">
+            <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
+            <ul style="list-style: none; font-size: var(--t-base); color: var(--muted);">
+              <li>115200 baud is used to match the firmware default.</li>
+              <li>If the port is already open in another tab, close it first.</li>
+              <li>Re-plug the tracker if you see no output after pressing Start.</li>
+            </ul>
+          </div>
         </section>
       </main>
     </div>
@@ -847,6 +898,23 @@
       return stepMap[state] !== undefined ? stepMap[state] : 1;
     }
 
+    // Hide the top "Connect Serial" button on the Flash Firmware step (user is
+    // busy with the ESP Web Tools modal there, and serial is not used in that flow).
+    // Show it on every other step so it acts as a global connect toggle.
+    const STEPS_WITHOUT_TOP_SERIAL = new Set([1]);
+    function syncTopSerialVisibility(stepIndex) {
+      const btn = document.getElementById('btn-top-serial');
+      if (!btn) return;
+      btn.style.display = STEPS_WITHOUT_TOP_SERIAL.has(stepIndex) ? 'none' : '';
+    }
+
+    // Wrap the global showStep (declared in <head>) so we can hook visibility.
+    const _baseShowStep = window.showStep;
+    window.showStep = function(stepIndex) {
+      _baseShowStep(stepIndex);
+      syncTopSerialVisibility(stepIndex);
+    };
+
     // showStep is defined globally in the head script; callable directly.
 
     function logToWifiLog(message, type = 'info') {
@@ -1033,6 +1101,108 @@
       btnConnectWifi.classList.remove('hidden');
       logToWifiLog('Ready to retry', 'info');
     });
+
+    // ----- Serial Log streaming (step 4) -----
+    const btnLogConnect = document.getElementById('btn-log-connect');
+    const btnLogClear = document.getElementById('btn-log-clear');
+    const liveLog = document.getElementById('live-log');
+    const logAutoscroll = document.getElementById('log-autoscroll');
+    const logStatus = document.getElementById('log-status');
+
+    let logPort = null;
+    let logReader = null;
+    let logStreaming = false;
+    let logAbortController = null;
+
+    const logDecoder = new TextDecoder();
+
+    function appendLog(chunk) {
+      // Append to the <pre>; keep buffer bounded to ~256 KB to avoid OOM.
+      const MAX = 256 * 1024;
+      if (liveLog.textContent.length + chunk.length > MAX) {
+        liveLog.textContent = liveLog.textContent.slice(-MAX);
+      }
+      liveLog.textContent += chunk;
+      if (logAutoscroll.checked) {
+        liveLog.scrollTop = liveLog.scrollHeight;
+      }
+    }
+
+    function setLogStatus(text, cls) {
+      logStatus.textContent = text;
+      logStatus.className = 'status-line' + (cls ? ' ' + cls : '');
+    }
+
+    async function startLogStream() {
+      if (logStreaming) return;
+      if (!('serial' in navigator)) {
+        setLogStatus('Web Serial not supported in this browser.', 'error');
+        return;
+      }
+      try {
+        setLogStatus('Select your tracker port...', 'info');
+        logPort = await navigator.serial.requestPort();
+        await logPort.open({ baudRate: 115200 });
+        logStreaming = true;
+        logAbortController = new AbortController();
+        btnLogConnect.textContent = 'Stop Streaming';
+        setLogStatus('Streaming at 115200 baud.', 'success');
+
+        logReader = logPort.readable.getReader();
+        try {
+          while (logStreaming) {
+            let value, done;
+            try {
+              ({ value, done } = await logReader.read());
+            } catch (readErr) {
+              break;
+            }
+            if (done) break;
+            if (value) {
+              appendLog(logDecoder.decode(value, { stream: true }));
+            }
+          }
+        } finally {
+          try { logReader.releaseLock(); } catch (e) {}
+        }
+      } catch (err) {
+        setLogStatus('Error: ' + err.message, 'error');
+      } finally {
+        logStreaming = false;
+        btnLogConnect.textContent = 'Start Streaming';
+        if (logPort) {
+          try { await logPort.close(); } catch (e) {}
+          logPort = null;
+        }
+        setLogStatus('Disconnected.', 'warn');
+      }
+    }
+
+    function stopLogStream() {
+      if (!logStreaming) return;
+      logStreaming = false;
+      try { if (logReader) logReader.cancel(); } catch (e) {}
+      try { if (logPort) logPort.close(); } catch (e) {}
+    }
+
+    btnLogConnect.addEventListener('click', () => {
+      if (logStreaming) stopLogStream();
+      else startLogStream();
+    });
+
+    btnLogClear.addEventListener('click', () => {
+      liveLog.textContent = '';
+    });
+
+    // Stop streaming when user navigates away from step 4.
+    const _baseShowStep2 = window.showStep;
+    window.showStep = function(stepIndex) {
+      _baseShowStep2(stepIndex);
+      syncTopSerialVisibility(stepIndex);
+      if (stepIndex !== 4 && logStreaming) {
+        stopLogStream();
+      }
+    };
 
     // Update state on load
     updateState(STATE.READY_TO_FLASH);
