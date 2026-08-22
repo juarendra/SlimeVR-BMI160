@@ -540,6 +540,21 @@
           </p>
 
           <div class="action-area">
+            <div style="display: flex; gap: var(--s4); margin-bottom: var(--s4); flex-wrap: wrap;">
+              <div class="hardware-identity" id="serial-badge">
+                <span class="identity-dot" style="background: var(--muted);"></span>
+                <span>Serial: <strong id="serial-status-text">Disconnected</strong></span>
+              </div>
+              <div class="hardware-identity" id="firmware-badge">
+                <span class="identity-dot" style="background: var(--muted);"></span>
+                <span>Firmware: <strong id="flash-status-text">Not Flashed Yet</strong></span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--s3); margin-bottom: var(--s4); flex-wrap: wrap;">
+              <button id="btn-manual-connect-serial" class="btn-primary" style="max-width: 220px; background: var(--signal-dark); color: var(--signal); border: 1px solid var(--signal);">🔌 Connect USB Serial</button>
+            </div>
+
             <div class="wifi-form" id="wifi-form">
               <div class="form-group">
                 <label for="wifi-ssid">WiFi Network Name (SSID)</label>
@@ -634,11 +649,75 @@
       DEVICE_DISCONNECTED: 'DEVICE_DISCONNECTED'
     };
 
-    let currentState = STATE.READY_TO_FLASH;
-    let port = null;
-    let reader = null;
-    let writer = null;
-    let wifiState = 'idle';
+    let activePort = null;
+    let isFirmwareFlashed = false;
+
+    function updateSerialStatus(connected, portInfo = '') {
+      const badge = document.getElementById('serial-badge');
+      const dot = badge?.querySelector('.identity-dot');
+      const text = document.getElementById('serial-status-text');
+      if (connected) {
+        if (dot) dot.style.background = 'var(--success)';
+        if (text) text.textContent = portInfo ? `Connected (${portInfo})` : 'Connected';
+      } else {
+        if (dot) dot.style.background = 'var(--danger)';
+        if (text) text.textContent = 'Disconnected';
+      }
+    }
+
+    function updateFirmwareStatus(flashed) {
+      isFirmwareFlashed = flashed;
+      const badge = document.getElementById('firmware-badge');
+      const dot = badge?.querySelector('.identity-dot');
+      const text = document.getElementById('flash-status-text');
+      if (flashed) {
+        if (dot) dot.style.background = 'var(--success)';
+        if (text) text.textContent = 'Flashed (Ready)';
+      } else {
+        if (dot) dot.style.background = 'var(--warning)';
+        if (text) text.textContent = 'Not Verified';
+      }
+    }
+
+    async function ensureSerialPort() {
+      if (activePort && activePort.readable && activePort.writable) {
+        return activePort;
+      }
+      try {
+        if (activePort) {
+          try { await activePort.close(); } catch(e) {}
+        }
+      } catch(e) {}
+
+      let ports = await navigator.serial.getPorts();
+      if (ports.length > 0) {
+        activePort = ports[0];
+        try {
+          await activePort.open({ baudRate: 115200 });
+          updateSerialStatus(true, 'Auto-detected');
+          return activePort;
+        } catch (err) {
+          logToWifiLog('Could not auto-open previous port, requesting user selection...', 'warn');
+        }
+      }
+
+      logToWifiLog('Please select your ESP32 tracker serial port in the browser popup...', 'info');
+      activePort = await navigator.serial.requestPort();
+      await activePort.open({ baudRate: 115200 });
+      updateSerialStatus(true, 'User-selected');
+      return activePort;
+    }
+
+    document.getElementById('btn-manual-connect-serial')?.addEventListener('click', async () => {
+      try {
+        logToWifiLog('Connecting to serial port...', 'info');
+        await ensureSerialPort();
+        logToWifiLog('Serial connected successfully! Ready to set WiFi.', 'success');
+      } catch (err) {
+        logToWifiLog('Serial connection error: ' + err.message, 'error');
+        updateSerialStatus(false);
+      }
+    });
 
     // DOM Elements
     const browserWarning = document.getElementById('browser-warning');
@@ -886,7 +965,7 @@
 
     // WiFi connection
     btnConnectWifi.addEventListener('click', async () => {
-      const ssid = document.getElementById('wifi-ssid').value;
+      const ssid = document.getElementById('wifi-ssid').value.trim();
       const password = document.getElementById('wifi-password').value;
 
       const validation = validateWifiCredentials(ssid, password);
@@ -899,108 +978,100 @@
       btnConnectWifi.classList.add('hidden');
       btnRetryWifi.classList.remove('hidden');
 
+      let currentPort = null;
+      let serialReader = null;
+      let serialWriter = null;
+
       try {
         if (!('serial' in navigator)) {
           showUnsupportedBrowser();
           return;
         }
 
-        const ports = await navigator.serial.getPorts();
-        if (ports.length === 0) {
-          throw new Error('No serial ports found. Connect your tracker.');
-        }
+        logToWifiLog('Connecting to device serial port...', 'info');
+        currentPort = await ensureSerialPort();
 
-        port = ports[0];
-        await port.open({ baudRate: 115200 });
+        serialReader = currentPort.readable.getReader();
+        serialWriter = currentPort.writable.getWriter();
 
-        reader = port.readable.getReader();
         const decoder = new TextDecoder();
-        
-        // Clear buffer
+        const encoder = new TextEncoder();
+
+        logToWifiLog(`Configuring WiFi for SSID "${ssid}"...`, 'info');
+
+        // Send command
+        const command = `SET WIFI "${ssid}" "${password}"\n`;
+        await serialWriter.write(encoder.encode(command));
+
+        logToWifiLog('Command sent, waiting for acknowledgment from tracker...', 'info');
+
+        // Read tracker responses
         let buffer = '';
-        while (Date.now() - Date.now() < 500) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-        }
+        let timeout = setTimeout(() => {
+          logToWifiLog('Timeout waiting for response. Check if tracker is running.', 'warn');
+        }, 10000);
 
-        // Encode credentials
-        const b64ssid = encodeBase64(ssid);
-        const b64pass = encodeBase64(password);
-
-        logToWifiLog(`Connecting to ${ssid}...`, 'info');
-
-        // Send WiFi credentials
-        const command = `SET WIFI "${ssid}" "${password}"`;
-        logToWifiLog(`Configuring WiFi for ${ssid}...`, 'info');
-
-        writer = port.writable.getWriter();
-        await sendSerialCommand(command);
-
-        // Wait for acknowledgment
-        try {
-          const response = await readSerialResponse(5000);
-          if (response.includes('CMD SET WIFI OK') || response.includes('OK') || response.includes('Adjusting')) {
-            logToWifiLog('Credentials accepted by tracker', 'success');
-            updateState(STATE.WAITING_FOR_WIFI);
-            verifyResult.textContent = 'Waiting for connection...';
-            verifyResult.style.color = 'var(--warning)';
-            verifyResult.style.animation = 'pulse 1s infinite';
-          } else {
-            throw new Error('Unexpected response');
-          }
-        } catch (timeoutError) {
-          logToWifiLog('No acknowledgment from tracker', 'error');
-          throw timeoutError;
-        }
-
-        // Wait for connection success (up to 30 seconds)
         const startTime = Date.now();
-        while (Date.now() - startTime < 30000) {
-          const { value, done } = await reader.read();
+        let acknowledged = false;
+
+        while (Date.now() - startTime < 35000) {
+          const { value, done } = await serialReader.read();
           if (done) break;
 
           const text = decoder.decode(value, { stream: true });
           buffer += text;
 
-          if (buffer.includes('Connected successfully to')) {
-            const match = buffer.match(/Connected successfully to '([^']+)'/);
-            const ssidConnected = match ? match[1] : ssid;
-            logToWifiLog(`Connected to ${ssidConnected}`, 'success');
-            updateState(STATE.CONNECTED);
-            verifyResult.textContent = `Connected to ${ssidConnected}`;
-            verifyResult.style.color = 'var(--success)';
-            verifyResult.style.animation = 'none';
-            break;
-          }
-
-          if (buffer.includes('Can\'t connect')) {
-            logToWifiLog('Failed to connect to WiFi', 'error');
-            updateState(STATE.PROVISION_FAILED);
-            verifyResult.textContent = 'Connection failed';
-            verifyResult.style.color = 'var(--danger)';
-            verifyResult.style.animation = 'none';
-            break;
-          }
-
-          // Clear processed lines
+          // Log lines from tracker to UI
           const lines = buffer.split('\n');
-          if (lines.length > 3) {
-            buffer = lines.slice(-2).join('\n');
+          buffer = lines.pop(); // Keep uncompleted line
+
+          for (const line of lines) {
+            const cleanLine = line.trim();
+            if (!cleanLine) continue;
+
+            if (cleanLine.includes('CMD SET WIFI OK') || cleanLine.includes('New wifi credentials set')) {
+              logToWifiLog('Tracker accepted credentials: ' + cleanLine, 'success');
+              acknowledged = true;
+              clearTimeout(timeout);
+              updateState(STATE.WAITING_FOR_WIFI);
+            } else if (cleanLine.includes('Connected successfully to')) {
+              logToWifiLog('Tracker connected to WiFi! ' + cleanLine, 'success');
+              updateState(STATE.CONNECTED);
+              verifyResult.textContent = `Connected to ${ssid}`;
+              verifyResult.style.color = 'var(--success)';
+              break;
+            } else if (cleanLine.includes("Can't connect") || cleanLine.includes('WIFI ERROR')) {
+              logToWifiLog('WiFi connection error: ' + cleanLine, 'error');
+              updateState(STATE.PROVISION_FAILED);
+              verifyResult.textContent = 'WiFi connection failed';
+              verifyResult.style.color = 'var(--danger)';
+              break;
+            } else if (cleanLine.includes('[INFO]') || cleanLine.includes('[DEBUG]') || cleanLine.includes('WiFi')) {
+              logToWifiLog(cleanLine, 'info');
+            }
+          }
+
+          if (currentState === STATE.CONNECTED || currentState === STATE.PROVISION_FAILED) {
+            break;
           }
         }
 
-        // Cleanup
-        await reader.cancel();
-        await port.close();
-        reader = null;
-        writer = null;
+        // Release reader & writer lock
+        try {
+          serialReader.releaseLock();
+          serialWriter.releaseLock();
+        } catch (e) {}
 
       } catch (error) {
         logToWifiLog(`Error: ${error.message}`, 'error');
+        updateSerialStatus(false);
         if (currentState !== STATE.PROVISION_FAILED) {
           updateState(STATE.PROVISION_FAILED);
         }
+        try {
+          if (serialReader) serialReader.releaseLock();
+          if (serialWriter) serialWriter.releaseLock();
+        } catch (e) {}
       }
     });
 
@@ -1046,6 +1117,7 @@
     button.addEventListener('install-success', () => {
       document.getElementById('flash-status').textContent = 'Firmware installed successfully';
       document.getElementById('flash-status').className = 'status-line success';
+      updateFirmwareStatus(true);
       updateState(STATE.FLASH_COMPLETE);
       
       setTimeout(() => {
