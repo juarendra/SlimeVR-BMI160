@@ -572,10 +572,9 @@
           </p>
 
           <div class="action-area">
-            <div id="esp-web-tools-container"></div>
-            <div class="progress-bar hidden" id="flash-progress-container">
-              <div class="progress-fill" id="flash-progress"></div>
-            </div>
+            <button id="btn-flash-firmware" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;">
+              ⚡ Flash Firmware
+            </button>
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
           </div>
 
@@ -716,6 +715,12 @@
 
   <!-- ESP Web Tools -->
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <script type="module">
+    // Force-load the dialog custom element so we can construct <ewt-install-dialog>
+    // directly (instead of via <esp-web-install-button> which would re-trigger
+    // navigator.serial.requestPort()). Importing the module side-effect-registers it.
+    import 'https://unpkg.com/esp-web-tools@10/dist/web/install-dialog-im156JnI.js?module';
+  </script>
   
   <script>
     // State machine
@@ -845,7 +850,6 @@
 
     // DOM Elements
     const browserWarning = document.getElementById('browser-warning');
-    const espWebToolsContainer = document.getElementById('esp-web-tools-container');
     const wifiForm = document.getElementById('wifi-form');
     const btnConnectWifi = document.getElementById('btn-connect-wifi');
     const btnRetryWifi = document.getElementById('btn-retry-wifi');
@@ -1175,37 +1179,81 @@
     // Update state on load
     updateState(STATE.READY_TO_FLASH);
 
-    // Create ESP Web Tools button
-    const button = document.createElement('esp-web-install-button');
-    button.manifest = './firmware/manifest.json';
-    button.addEventListener('install-progress', (e) => {
-      const progress = e.detail.progress;
-      const progressContainer = document.getElementById('flash-progress-container');
-      const progressBar = document.getElementById('flash-progress');
-      
-      progressContainer.classList.remove('hidden');
-      progressBar.style.width = `${progress}%`;
-    });
+    // ----- Flash Firmware button (step 1) -----
+    // Uses the ewt-install-dialog from esp-web-tools internally. We construct it
+    // programmatically and pass our already-open serial port so the user does
+    // NOT see a second port picker (the top Connect Serial button is the only
+    // place port selection happens).
+    const btnFlash = document.getElementById('btn-flash-firmware');
+    const flashStatus = document.getElementById('flash-status');
+    let flashDialog = null;
 
-    button.addEventListener('install-success', () => {
-      document.getElementById('flash-status').textContent = 'Firmware installed successfully';
-      document.getElementById('flash-status').className = 'status-line success';
-      updateFirmwareStatus(true);
-      updateState(STATE.FLASH_COMPLETE);
-      
-      setTimeout(() => {
-        updateState(STATE.READY_TO_PROVISION);
-        document.getElementById('flash-progress-container').classList.add('hidden');
-        document.getElementById('flash-status').textContent = '';
-      }, 2000);
-    });
+    async function startFlash() {
+      // Guard: serial port must already be open via the top Connect Serial toggle.
+      if (!activePort || !activePort.readable || !activePort.writable) {
+        flashStatus.className = 'status-line error';
+        flashStatus.textContent = 'Connect your tracker serial port first (button at the top), then try again.';
+        const topBtn = document.getElementById('btn-top-serial');
+        if (topBtn) {
+          if (typeof topBtn.scrollIntoView === 'function') {
+            topBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          topBtn.classList.add('attention-pulse');
+          setTimeout(() => topBtn.classList.remove('attention-pulse'), 1800);
+          try { topBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+        }
+        return;
+      }
 
-    button.addEventListener('install-error', (e) => {
-      document.getElementById('flash-status').textContent = `Error: ${e.detail.message}`;
-      document.getElementById('flash-status').className = 'status-line error';
-    });
+      btnFlash.disabled = true;
+      flashStatus.className = 'status-line info';
+      flashStatus.textContent = 'Opening flash dialog...';
 
-    espWebToolsContainer.appendChild(button);
+      try {
+        flashDialog = document.createElement('ewt-install-dialog');
+        flashDialog.port = activePort;
+        flashDialog.manifestPath = './firmware/manifest.json';
+        document.body.appendChild(flashDialog);
+
+        flashDialog.addEventListener('closed', async (e) => {
+          // The dialog's _installState holds the final result.
+          const result = flashDialog._installState;
+          if (result && result.state === 'finished') {
+            flashStatus.className = 'status-line success';
+            flashStatus.textContent = 'Firmware installed successfully';
+            updateFirmwareStatus(true);
+            updateState(STATE.FLASH_COMPLETE);
+            setTimeout(() => {
+              updateState(STATE.READY_TO_PROVISION);
+              flashStatus.textContent = '';
+            }, 2500);
+          } else if (result && result.state === 'error') {
+            flashStatus.className = 'status-line error';
+            flashStatus.textContent = `Flash failed: ${result.message || 'unknown error'}`;
+          } else {
+            // Closed without finishing (user dismissed dialog).
+            flashStatus.className = 'status-line';
+            flashStatus.textContent = '';
+          }
+          // Dialog closes itself; ensure cleanup.
+          if (flashDialog && flashDialog.parentNode) {
+            flashDialog.parentNode.removeChild(flashDialog);
+          }
+          flashDialog = null;
+          btnFlash.disabled = false;
+        }, { once: true });
+      } catch (err) {
+        flashStatus.className = 'status-line error';
+        flashStatus.textContent = `Error: ${err.message}`;
+        btnFlash.disabled = false;
+        if (flashDialog && flashDialog.parentNode) {
+          flashDialog.parentNode.removeChild(flashDialog);
+        }
+        flashDialog = null;
+      }
+    }
+
+    btnFlash.addEventListener('click', startFlash);
   </script>
 </body>
 </html>
