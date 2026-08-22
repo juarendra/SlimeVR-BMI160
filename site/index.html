@@ -759,28 +759,45 @@
       const origConfirm = Cls.prototype._confirmInstall;
       Cls.prototype._confirmInstall = async function () {
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        console.log('[Flash] _confirmInstall called');
         try {
           if (this.port) {
+            console.log('[Flash] Step 1: closing port');
             try { await this.port.close(); } catch (e) { /* ignore */ }
+            console.log('[Flash] Step 2: opening port + manual reset sequence');
             try {
               await this.port.open({ baudRate: 115200 });
+              console.log('[Flash] Step 2a: DTR=false, RTS=false');
               await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
               await sleep(120);
+              console.log('[Flash] Step 2b: DTR=false, RTS=true');
               await this.port.setSignals({ dataTerminalReady: false, requestToSend: true });
               await sleep(120);
+              console.log('[Flash] Step 2c: DTR=true, RTS=true');
               await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
               await sleep(120);
+              console.log('[Flash] Step 2d: DTR=true, RTS=false');
               await this.port.setSignals({ dataTerminalReady: true, requestToSend: false });
               await sleep(400);
+              console.log('[Flash] Step 2e: manual reset complete');
             } catch (sigErr) {
-              console.warn('Manual bootloader reset failed; falling back to library reset:', sigErr);
+              console.warn('[Flash] Manual bootloader reset failed; falling back to library reset:', sigErr);
             }
+            console.log('[Flash] Step 3: closing port before esptool');
             try { await this.port.close(); } catch (e) { /* ignore */ }
           }
         } catch (outerErr) {
-          console.warn('Bootloader prep wrapper error (continuing):', outerErr);
+          console.warn('[Flash] Bootloader prep wrapper error (continuing):', outerErr);
         }
-        return origConfirm.apply(this, arguments);
+        console.log('[Flash] Calling original _confirmInstall');
+        try {
+          const result = await origConfirm.apply(this, arguments);
+          console.log('[Flash] Original _confirmInstall finished');
+          return result;
+        } catch (e) {
+          console.error('[Flash] Original _confirmInstall threw:', e);
+          throw e;
+        }
       };
     }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
   </script>
