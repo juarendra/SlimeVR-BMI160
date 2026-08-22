@@ -36,14 +36,16 @@ Sebelum penggunaan, isi daya tracker menggunakan kabel USB-C.
 - Lampu **biru** akan menyala saat pengisian berlangsung.
 - Lampu **merah** akan menyala jika baterai sudah penuh.
 
-### 3. Konfigurasi Wi-Fi (PENTING!)
-Tracker ini **tidak memiliki portal web** untuk pengaturan Wi-Fi. Nama (SSID) dan password Wi-Fi Anda harus dimasukkan langsung ke dalam kode firmware (`hardcode`) sebelum di-upload (flash) ke tracker.
+### 3. Flash & Konfigurasi Wi-Fi
 
-Ini berarti, jika Anda ingin menghubungkan tracker ke jaringan Wi-Fi baru, Anda **wajib melakukan proses flashing ulang.**
+Kini tersedia **Web Installer (Mudah, Tanpa Install Software)**:
+1. Buka [SlimeVR BMI160 Web Installer](https://juarendra.github.io/SlimeVR-BMI160/) di Chrome / Edge (PC).
+2. Hubungkan tracker via USB.
+3. Klik **Install Firmware** lalu masukkan SSID & Password Wi-Fi via form web.
 
-Untuk panduan lengkap mengenai cara instalasi software, memasukkan detail Wi-Fi, dan melakukan flashing, silakan ikuti panduan terperinci di bawah ini.
+Untuk metode manual / development menggunakan VS Code & PlatformIO, ikuti panduan firmware:
 
-### **➡️ [Klik di sini untuk Panduan Flashing Lengkap](./FIRMWARE/README.md)**
+### **➡️ [Klik di sini untuk Panduan Manual Flashing](./FIRMWARE/README.md)**
 
 ### 4. Pemecahan Masalah Umum
 - **Tracker tidak muncul di server SlimeVR.**
