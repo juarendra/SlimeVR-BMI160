@@ -132,7 +132,7 @@ void cmdSet(CmdParser* parser) {
 					ppass = NULL;
 				}
 				WiFiNetwork::setWiFiCredentials(ssid, ppass);
-				logger.info("CMD SET BWIFI OK: New wifi credentials set, reconnecting");
+				logger.info("CMD SET BWIFI OK: New wifi credentials set for SSID '%s', reconnecting", ssid);
 			}
 		} else {
 			logger.error("CMD SET ERROR: Unrecognized variable to set");

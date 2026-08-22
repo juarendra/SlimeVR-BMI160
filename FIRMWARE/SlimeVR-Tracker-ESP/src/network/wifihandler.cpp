@@ -58,6 +58,7 @@ bool WiFiNetwork::isConnected() { return isWifiConnected; }
 void WiFiNetwork::setWiFiCredentials(const char* SSID, const char* pass) {
 	stopProvisioning();
 	setStaticIPIfDefined();
+	wifiHandlerLogger.info("Connecting to SSID '%s' with password length %d", SSID, pass ? strlen(pass) : 0);
 	WiFi.begin(SSID, pass);
 	// Reset state, will get back into provisioning if can't connect
 	hadWifi = false;
@@ -162,13 +163,16 @@ void WiFiNetwork::upkeep() {
 						setStaticIPIfDefined();
 						WiFi.begin();
 						wifiConnectionTimeout = millis();
-						wifiHandlerLogger.error(
-							"Can't connect from saved credentials, status: %d.",
-							WiFi.status()
-						);
-						wifiHandlerLogger.debug(
-							"Trying saved credentials with PHY Mode G..."
-						);
+					wifiHandlerLogger.error(
+						"Can't connect from saved credentials, status: %d (SSID: %s, PSK length: %d)",
+						WiFi.status(),
+						WiFi.SSID().c_str(),
+						WiFi.psk().length()
+					);
+					wifiHandlerLogger.debug(
+						"Trying saved credentials with PHY Mode G... (SSID: %s)",
+						WiFi.SSID().c_str()
+					);
 					} else {
 						wifiHandlerLogger.debug(
 							"Skipping PHY Mode G attempt on 0-length SSID..."
@@ -191,10 +195,15 @@ void WiFiNetwork::upkeep() {
 					WiFi.begin(WIFI_CREDS_SSID, WIFI_CREDS_PASSWD);
 					wifiConnectionTimeout = millis();
 					wifiHandlerLogger.error(
-						"Can't connect from saved credentials, status: %d.",
-						WiFi.status()
+						"Can't connect from saved credentials, status: %d (SSID: %s, PSK length: %d)",
+						WiFi.status(),
+						WiFi.SSID().c_str(),
+						WiFi.psk().length()
 					);
-					wifiHandlerLogger.debug("Trying hardcoded credentials...");
+					wifiHandlerLogger.debug(
+						"Trying hardcoded credentials... (SSID: %s)",
+						WIFI_CREDS_SSID
+					);
 #endif
 					wifiState = SLIME_WIFI_HARDCODE_ATTEMPT;
 					return;
@@ -211,11 +220,14 @@ void WiFiNetwork::upkeep() {
 					WiFi.begin(WIFI_CREDS_SSID, WIFI_CREDS_PASSWD);
 					wifiConnectionTimeout = millis();
 					wifiHandlerLogger.error(
-						"Can't connect from saved credentials, status: %d.",
-						WiFi.status()
+						"Can't connect from saved credentials, status: %d (SSID: %s, PSK length: %d)",
+						WiFi.status(),
+						WiFi.SSID().c_str(),
+						WiFi.psk().length()
 					);
 					wifiHandlerLogger.debug(
-						"Trying hardcoded credentials with WiFi PHY Mode G..."
+						"Trying hardcoded credentials with WiFi PHY Mode G... (SSID: %s)",
+						WIFI_CREDS_SSID
 					);
 #endif
 					wifiState = SLIME_WIFI_HARDCODE_G_ATTEMPT;
@@ -251,10 +263,12 @@ void WiFiNetwork::upkeep() {
 					if (!hadWifi && !WiFi.smartConfigDone()
 						&& wifiConnectionTimeout + 11000 < millis()) {
 						if (WiFi.status() != WL_IDLE_STATUS) {
-							wifiHandlerLogger.error(
-								"Can't connect from any credentials, status: %d.",
-								WiFi.status()
-							);
+					wifiHandlerLogger.error(
+						"Can't connect from any credentials, status: %d (SSID: %s, PSK length: %d)",
+						WiFi.status(),
+						WiFi.SSID().c_str(),
+						WiFi.psk().length()
+					);
 							wifiConnectionTimeout = millis();
 						}
 						startProvisioning();
