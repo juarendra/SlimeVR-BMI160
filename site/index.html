@@ -500,7 +500,7 @@
     <div class="status-bar">
       <div class="status-group">
         <button id="btn-top-serial" class="btn-serial-connect">
-          <span class="status-led" id="top-serial-led" style="background: #ef4444;"></span>
+          <span class="status-led" id="top-serial-led" style="background: var(--danger);"></span>
           <span id="top-serial-text">Connect Serial (Disconnected)</span>
         </button>
       </div>
@@ -693,6 +693,7 @@
 
     let activePort = null;
     let isFirmwareFlashed = false;
+    let currentState = null;
 
     function updateSerialStatus(connected, portInfo = '') {
       const btn = document.getElementById('btn-top-serial');
@@ -704,7 +705,7 @@
         if (text) text.textContent = portInfo ? `Serial: Connected (${portInfo})` : 'Serial: Connected';
       } else {
         btn?.classList.remove('connected');
-        if (led) led.style.background = '#ef4444';
+        if (led) led.style.background = 'var(--danger)';
         if (text) text.textContent = 'Connect Serial (Disconnected)';
       }
     }
@@ -768,13 +769,17 @@
             try { reader.cancel(); } catch(e) {}
           }, 2000);
 
-          while (Date.now() - startTime < 2000) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            initialData += decoder.decode(value, { stream: true });
-            if (initialData.includes('SlimeVR') || initialData.includes('BMI160') || initialData.includes('WiFi')) {
-              break;
+          try {
+            while (Date.now() - startTime < 2000) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              initialData += decoder.decode(value, { stream: true });
+              if (initialData.includes('SlimeVR') || initialData.includes('BMI160') || initialData.includes('WiFi')) {
+                break;
+              }
             }
+          } catch (readLoopErr) {
+            // Reader was cancelled or stream errored out; that's expected during probe.
           }
           clearTimeout(timeout);
           try { reader.releaseLock(); } catch(e) {}
@@ -818,8 +823,7 @@
     function showUnsupportedBrowser() {
       currentState = STATE.UNSUPPORTED_BROWSER;
       browserWarning.classList.add('visible');
-      document.getElementById('btn-inspect').disabled = true;
-      document.getElementById('btn-connect-wifi').disabled = true;
+      btnConnectWifi.disabled = true;
     }
 
     function updateState(newState) {
@@ -845,18 +849,8 @@
       return stepMap[state] !== undefined ? stepMap[state] : 1;
     }
 
-    // Expose showStep globally for inline HTML onclick fallback
-    window.showStep = function(stepIndex) {
-      const items = document.querySelectorAll('.step-item');
-      const contents = document.querySelectorAll('.step-content');
-      items.forEach((item, idx) => {
-        item.classList.toggle('active', idx === stepIndex);
-      });
-      contents.forEach((content, idx) => {
-        content.classList.toggle('hidden', idx !== stepIndex);
-      });
-    };
-
+    // showStep is defined in the head script as window.showStep.
+    // Alias here so addEventListener handlers and other JS code can call it.
     function showStep(stepIndex) {
       window.showStep(stepIndex);
     }
@@ -877,30 +871,6 @@
       verifyLog.scrollTop = verifyLog.scrollHeight;
     }
 
-    // Helper: Encode to Base64
-    function encodeBase64(str) {
-      const encoder = new TextEncoder();
-      const bytes = encoder.encode(str);
-      let binary = '';
-      bytes.forEach(b => binary += String.fromCharCode(b));
-      return btoa(binary);
-    }
-
-    // Helper: Decode Base64
-    function decodeBase64(b64) {
-      try {
-        const binary = atob(b64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes);
-      } catch (e) {
-        return null;
-      }
-    }
-
     // Helper: Validate WiFi credentials
     function validateWifiCredentials(ssid, password) {
       const encoder = new TextEncoder();
@@ -918,90 +888,6 @@
       return { valid: true };
     }
 
-    // Helper: Send serial command
-    async function sendSerialCommand(command) {
-      if (!writer) {
-        throw new Error('Serial writer not available');
-      }
-      const encoder = new TextEncoder();
-      const data = encoder.encode(command + '\n');
-      await writer.write(data);
-    }
-
-    // Helper: Read serial response
-    async function readSerialResponse(timeoutMs = 5000) {
-      const decoder = new TextDecoder();
-      let buffer = '';
-      const startTime = Date.now();
-
-      while (Date.now() - startTime < timeoutMs) {
-        if (!reader || reader.closed) {
-          throw new Error('Serial reader closed');
-        }
-
-        const { value, done } = await reader.read();
-        if (done) {
-          throw new Error('Serial connection closed');
-        }
-
-        if (value) {
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); // Keep partial line
-          
-          if (lines.length > 0) {
-            return lines[lines.length - 1];
-          }
-        }
-      }
-
-      throw new Error('Timeout waiting for response');
-    }
-
-    // Button handlers
-    document.getElementById('btn-inspect').addEventListener('click', async () => {
-      try {
-        if (!('serial' in navigator)) {
-          showUnsupportedBrowser();
-          return;
-        }
-
-        const ports = await navigator.serial.getPorts();
-        if (ports.length === 0) {
-          logToWifiLog('No serial ports found. Connect your tracker and try again.', 'error');
-          return;
-        }
-
-        port = ports[0];
-        await port.open({ baudRate: 115200 });
-        
-        // Read initial output
-        reader = port.readable.getReader();
-        const decoder = new TextDecoder();
-        let output = '';
-        
-        const startTime = Date.now();
-        while (Date.now() - startTime < 3000) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          output += decoder.decode(value, { stream: true });
-        }
-
-        document.getElementById('device-identity').querySelector('.device-id').textContent = 'ESP32 WROOM + BMI160';
-        logToWifiLog(`Device detected: ESP32`, 'success');
-        logToWifiLog(`Firmware: ${output.includes('SlimeVR') ? 'Detected' : 'Unknown'}`);
-        
-        await reader.cancel();
-        await port.close();
-        port = null;
-        reader = null;
-
-        updateState(STATE.READY_TO_FLASH);
-      } catch (error) {
-        logToWifiLog(`Error: ${error.message}`, 'error');
-      }
-    });
-
     // Setup navigation and step switching after DOM ready
     window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.step-item').forEach((item) => {
@@ -1017,20 +903,6 @@
       document.getElementById('btn-back-to-inspect')?.addEventListener('click', (e) => { e.preventDefault(); showStep(0); });
       document.getElementById('btn-back-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
     });
-
-    // Also bind directly in case DOM is already ready
-    document.querySelectorAll('.step-item').forEach((item) => {
-      item.addEventListener('click', () => {
-        const step = parseInt(item.getAttribute('data-step'), 10);
-        showStep(step);
-      });
-    });
-
-    document.getElementById('btn-skip-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
-    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
-    document.getElementById('btn-goto-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
-    document.getElementById('btn-back-to-inspect')?.addEventListener('click', (e) => { e.preventDefault(); showStep(0); });
-    document.getElementById('btn-back-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
 
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordInput = document.getElementById('wifi-password');
@@ -1095,7 +967,12 @@
         let acknowledged = false;
 
         while (Date.now() - startTime < 35000) {
-          const { value, done } = await serialReader.read();
+          let value, done;
+          try {
+            ({ value, done } = await serialReader.read());
+          } catch (readErr) {
+            break;
+          }
           if (done) break;
 
           const text = decoder.decode(value, { stream: true });
