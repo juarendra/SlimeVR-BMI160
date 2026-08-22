@@ -720,6 +720,37 @@
     // directly (instead of via <esp-web-install-button> which would re-trigger
     // navigator.serial.requestPort()). Importing the module side-effect-registers it.
     import 'https://unpkg.com/esp-web-tools@10/dist/web/install-dialog-im156JnI.js?module';
+
+    // Patch the install dialog so its primary action button reads
+    // "Flash SlimeVR BMI160 Tracker" instead of "Install SlimeVR BMI160 Tracker".
+    // The dialog is built with Lit templates that bake in the "Install" prefix
+    // literally, so we hook the element's update lifecycle and rewrite matching
+    // text nodes after each render.
+    customElements.whenDefined('ewt-install-dialog').then(() => {
+      const Cls = customElements.get('ewt-install-dialog');
+      if (!Cls || Cls.__flashPatched) return;
+      Cls.__flashPatched = true;
+      const origUpdated = Cls.prototype.updated;
+      Cls.prototype.updated = function (changedProps) {
+        if (origUpdated) origUpdated.call(this, changedProps);
+        const root = this.shadowRoot;
+        if (!root) return;
+        // Lit may schedule multiple async updates; patch each one.
+        queueMicrotask(() => {
+          if (!this.shadowRoot) return;
+          const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode())) {
+            if (node.nodeValue && node.nodeValue.includes('Install SlimeVR BMI160 Tracker')) {
+              node.nodeValue = node.nodeValue.replaceAll(
+                'Install SlimeVR BMI160 Tracker',
+                'Flash SlimeVR BMI160 Tracker'
+              );
+            }
+          }
+        });
+      };
+    }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
   </script>
   
   <script>
