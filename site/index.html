@@ -750,6 +750,38 @@
           }
         });
       };
+
+      // Patch _confirmInstall to manually pulse ESP32 into bootloader before the
+      // library's esptool classic reset. Some auto-downloader boards ignore the
+      // library's DTR/RTS polarity (it's tuned for CH340-family chips) and need
+      // the standard esptool.py sequence: DTR low -> RTS high (reset) -> DTR high
+      // (IO0=LOW) -> RTS low (EN=HIGH, bootloader).
+      const origConfirm = Cls.prototype._confirmInstall;
+      Cls.prototype._confirmInstall = async function () {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        try {
+          if (this.port) {
+            try { await this.port.close(); } catch (e) { /* ignore */ }
+            try {
+              await this.port.open({ baudRate: 115200 });
+              await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
+              await sleep(120);
+              await this.port.setSignals({ dataTerminalReady: false, requestToSend: true });
+              await sleep(120);
+              await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
+              await sleep(120);
+              await this.port.setSignals({ dataTerminalReady: true, requestToSend: false });
+              await sleep(400);
+            } catch (sigErr) {
+              console.warn('Manual bootloader reset failed; falling back to library reset:', sigErr);
+            }
+            try { await this.port.close(); } catch (e) { /* ignore */ }
+          }
+        } catch (outerErr) {
+          console.warn('Bootloader prep wrapper error (continuing):', outerErr);
+        }
+        return origConfirm.apply(this, arguments);
+      };
     }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
   </script>
   
@@ -1234,6 +1266,13 @@
           try { topBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
         }
         return;
+      }
+
+      // Release the log-stream reader if it's holding the port, so the flash
+      // dialog's esptool transport can take it over.
+      if (typeof stopLogStream === 'function' && logStreaming) {
+        stopLogStream();
+        await new Promise(r => setTimeout(r, 150));
       }
 
       btnFlash.disabled = true;
