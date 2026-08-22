@@ -1,0 +1,18 @@
+{
+  "name": "SlimeVR BMI160 Tracker",
+  "version": "positron-20260822",
+  "home_page": "https://github.com/juarendra/SlimeVR-BMI160",
+  "new_install_prompt_erase": false,
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "./firmware/positron-20260822/slimevr-bmi160-esp32-full.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
