@@ -117,7 +117,7 @@ void cmdSet(CmdParser* parser) {
 				const char* sc_pw = parser->getCmdParam(3);
 
 				if (!lengthCheck(sc_ssid, 32, "CMD SET WIFI", "SSID")
-					&& !lengthCheck(sc_pw, 64, "CMD SET WIFI", "Password")) {
+					|| !lengthCheck(sc_pw, 64, "CMD SET WIFI", "Password")) {
 					return;
 				}
 
