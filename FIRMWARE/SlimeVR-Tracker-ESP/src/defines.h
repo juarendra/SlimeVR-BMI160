@@ -19,8 +19,8 @@
 // BAT_EXTERNAL for ADC pin, BAT_INTERNAL for internal - can detect only low battery, BAT_MCP3021 for external ADC
 #define BATTERY_MONITOR BAT_EXTERNAL
 #define BATTERY_SHIELD_RESISTANCE 0 //130k BatteryShield, 180k SlimeVR or fill in external resistor value in kOhm
-#define BATTERY_SHIELD_R1 10 //Board voltage divider resistor Ain to GND in kOhm
-#define BATTERY_SHIELD_R2 46.5 //Board voltage divider resistor Ain to INPUT_BOARD in kOhm
+#define BATTERY_SHIELD_R1 1.0 //Resistor to GND in kOhm
+#define BATTERY_SHIELD_R2 1.82 //Resistor to battery in kOhm
 
 #define PIN_IMU_SDA 21
 #define PIN_IMU_SCL 22

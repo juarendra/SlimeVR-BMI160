@@ -75,8 +75,9 @@ void BatteryMonitor::Loop() {
 				* ADCMultiplier;
 #endif
 #if defined(ESP32) && BATTERY_MONITOR == BAT_EXTERNAL
-		voltage
-			= ((float)analogReadMilliVolts(PIN_BATTERY_LEVEL)) / 1000 * ADCMultiplier;
+		float adcVolts = ((float)analogReadMilliVolts(PIN_BATTERY_LEVEL)) / 1000;
+		voltage = adcVolts * ADCMultiplier;
+		Serial.printf("[DEBUG] ADCRaw: %.3fV, Multiplier: %.4f, Result: %.3fV\n", adcVolts, ADCMultiplier, voltage);
 #endif
 #if BATTERY_MONITOR == BAT_MCP3021 || BATTERY_MONITOR == BAT_INTERNAL_MCP3021
 		if (address > 0) {
