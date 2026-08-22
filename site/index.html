@@ -117,6 +117,14 @@
       font-size: var(--t-sm);
       padding: var(--s2) var(--s3);
       border-radius: var(--r);
+      cursor: pointer;
+      user-select: none;
+      transition: 0.15s var(--ease);
+    }
+
+    .step-item:hover {
+      background: var(--ink-850);
+      color: var(--paper);
     }
 
     .step-item.active {
@@ -479,7 +487,11 @@
               <span class="identity-dot"></span>
               <span class="device-id">Unknown</span>
             </div>
-            <button id="btn-inspect" class="btn-primary" style="max-width: 200px; margin-top: var(--s4);">Check Connection</button>
+            <div style="display: flex; gap: var(--s3); margin-top: var(--s4); flex-wrap: wrap;">
+              <button id="btn-inspect" class="btn-primary" style="max-width: 200px;">Check Connection</button>
+              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 180px; background: var(--ink-800); border: 1px solid var(--line); color: var(--paper);">Next: Flash →</button>
+              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 180px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);">Skip to WiFi Setup ⚡</button>
+            </div>
           </div>
 
           <details>
@@ -507,6 +519,11 @@
               <div class="progress-fill" id="flash-progress"></div>
             </div>
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
+            
+            <div style="display: flex; gap: var(--s3); margin-top: var(--s5); border-top: 1px solid var(--line); padding-top: var(--s4); flex-wrap: wrap;">
+              <button id="btn-goto-wifi" class="btn-primary" style="max-width: 220px;">Proceed to WiFi Setup →</button>
+              <button id="btn-back-to-inspect" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
+            </div>
           </div>
 
           <p class="step-instruction" style="font-size: var(--t-sm);">
@@ -542,8 +559,11 @@
                 </p>
               </div>
 
-              <button id="btn-connect-wifi" class="btn-primary">Connect WiFi</button>
-              <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
+              <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
+                <button id="btn-connect-wifi" class="btn-primary">Connect WiFi</button>
+                <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
+                <button id="btn-back-to-flash" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
+              </div>
             </div>
           </div>
 
@@ -822,6 +842,36 @@
         logToWifiLog(`Error: ${error.message}`, 'error');
       }
     });
+
+    // Make Step rail clickable
+    stepItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        const step = parseInt(item.getAttribute('data-step'), 10);
+        const stateMap = [
+          STATE.READY_TO_FLASH, // Step 0: Inspect
+          STATE.READY_TO_FLASH, // Step 1: Flash
+          STATE.READY_TO_PROVISION, // Step 2: WiFi
+          STATE.CONNECTED // Step 3: Verify
+        ];
+        if (step === 0) {
+          stepItems.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          stepContents.forEach((c, idx) => c.classList.toggle('hidden', idx !== 0));
+        } else {
+          updateState(stateMap[step]);
+        }
+      });
+    });
+
+    // Navigation buttons
+    document.getElementById('btn-skip-to-flash')?.addEventListener('click', () => updateState(STATE.READY_TO_FLASH));
+    document.getElementById('btn-skip-to-wifi')?.addEventListener('click', () => updateState(STATE.READY_TO_PROVISION));
+    document.getElementById('btn-goto-wifi')?.addEventListener('click', () => updateState(STATE.READY_TO_PROVISION));
+    document.getElementById('btn-back-to-inspect')?.addEventListener('click', () => {
+      stepItems.forEach((i, idx) => i.classList.toggle('active', idx === 0));
+      stepContents.forEach((c, idx) => c.classList.toggle('hidden', idx !== 0));
+    });
+    document.getElementById('btn-back-to-flash')?.addEventListener('click', () => updateState(STATE.READY_TO_FLASH));
 
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordInput = document.getElementById('wifi-password');
