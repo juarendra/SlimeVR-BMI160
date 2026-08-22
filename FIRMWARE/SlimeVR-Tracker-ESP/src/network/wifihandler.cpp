@@ -232,6 +232,8 @@ void WiFiNetwork::upkeep() {
 					WiFi.begin();
 					wifiConnectionTimeout = millis();
 					wifiState = SLIME_WIFI_SERVER_CRED_G_ATTEMPT;
+#else
+					wifiState = SLIME_WIFI_SERVER_CRED_G_ATTEMPT;
 #endif
 					return;
 				case SLIME_WIFI_HARDCODE_G_ATTEMPT:  // Couldn't connect with second set
