@@ -549,14 +549,8 @@
           <p class="step-instruction">
             Ensure your SlimeVR BMI160 tracker is connected to this computer via USB.
             Click <strong>Connect Serial</strong> above to link your tracker port.
+            Use the step rail on the left to navigate.
           </p>
-
-          <div class="action-area">
-            <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
-              <button id="btn-skip-to-flash" class="btn-primary" style="max-width: 200px;">Next: Flash Firmware →</button>
-              <button id="btn-skip-to-wifi" class="btn-primary" style="max-width: 200px; background: var(--ink-800); border: 1px solid var(--copper); color: var(--copper);">Skip to WiFi Setup ⚡</button>
-            </div>
-          </div>
 
           <details>
             <summary>Troubleshooting</summary>
@@ -583,11 +577,6 @@
               <div class="progress-fill" id="flash-progress"></div>
             </div>
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
-            
-            <div style="display: flex; gap: var(--s3); margin-top: var(--s5); border-top: 1px solid var(--line); padding-top: var(--s4); flex-wrap: wrap;">
-              <button id="btn-goto-wifi" class="btn-primary" style="max-width: 220px;">Proceed to WiFi Setup →</button>
-              <button id="btn-back-to-inspect" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
-            </div>
           </div>
 
           <p class="step-instruction" style="font-size: var(--t-sm);">
@@ -626,7 +615,6 @@
               <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
                 <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
                 <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
-                <button id="btn-back-to-flash" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">← Back</button>
               </div>
             </div>
           </div>
@@ -747,6 +735,7 @@
 
     let activePort = null;
     let currentState = null;
+    let logStreaming = false;
 
     function updateSerialStatus(connected, portInfo = '') {
       const btn = document.getElementById('btn-top-serial');
@@ -898,21 +887,17 @@
       return stepMap[state] !== undefined ? stepMap[state] : 1;
     }
 
-    // Hide the top "Connect Serial" button on the Flash Firmware step (user is
-    // busy with the ESP Web Tools modal there, and serial is not used in that flow).
-    // Show it on every other step so it acts as a global connect toggle.
-    const STEPS_WITHOUT_TOP_SERIAL = new Set([1]);
-    function syncTopSerialVisibility(stepIndex) {
-      const btn = document.getElementById('btn-top-serial');
-      if (!btn) return;
-      btn.style.display = STEPS_WITHOUT_TOP_SERIAL.has(stepIndex) ? 'none' : '';
-    }
+    // The top "Connect Serial" button is the global serial toggle. It stays
+    // visible on every step so the user can connect/disconnect at any time.
 
-    // Wrap the global showStep (declared in <head>) so we can hook visibility.
+    // Wrap the global showStep (declared in <head>) so streaming auto-stops
+    // when the user leaves step 5.
     const _baseShowStep = window.showStep;
     window.showStep = function(stepIndex) {
       _baseShowStep(stepIndex);
-      syncTopSerialVisibility(stepIndex);
+      if (stepIndex !== 4 && logStreaming) {
+        stopLogStream();
+      }
     };
 
     // showStep is defined globally in the head script; callable directly.
@@ -950,12 +935,6 @@
           showStep(step);
         });
       });
-
-      document.getElementById('btn-skip-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
-      document.getElementById('btn-skip-to-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
-      document.getElementById('btn-goto-wifi')?.addEventListener('click', (e) => { e.preventDefault(); showStep(2); });
-      document.getElementById('btn-back-to-inspect')?.addEventListener('click', (e) => { e.preventDefault(); showStep(0); });
-      document.getElementById('btn-back-to-flash')?.addEventListener('click', (e) => { e.preventDefault(); showStep(1); });
     });
 
     document.getElementById('toggle-password').addEventListener('click', function() {
@@ -1111,7 +1090,6 @@
 
     let logPort = null;
     let logReader = null;
-    let logStreaming = false;
     let logAbortController = null;
 
     const logDecoder = new TextDecoder();
@@ -1193,16 +1171,6 @@
     btnLogClear.addEventListener('click', () => {
       liveLog.textContent = '';
     });
-
-    // Stop streaming when user navigates away from step 4.
-    const _baseShowStep2 = window.showStep;
-    window.showStep = function(stepIndex) {
-      _baseShowStep2(stepIndex);
-      syncTopSerialVisibility(stepIndex);
-      if (stepIndex !== 4 && logStreaming) {
-        stopLogStream();
-      }
-    };
 
     // Update state on load
     updateState(STATE.READY_TO_FLASH);
