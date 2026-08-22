@@ -61,6 +61,42 @@ bool lengthCheck(
 	return true;
 }
 
+bool decode_base64_safe(
+	const char* b64,
+	unsigned int b64len,
+	unsigned char* out,
+	unsigned int outSize
+) {
+	// Validate Base64 characters and length before decoding
+	for (unsigned int i = 0; i < b64len; i++) {
+		char c = b64[i];
+		if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+		      (c >= '0' && c <= '9') || c == '+' || c == '/' || c == '=')) {
+			return false;  // Invalid Base64 character
+		}
+	}
+	// Check for valid padding
+	if (b64len > 0 && b64[b64len - 1] == '=') {
+		if (b64len > 1 && b64[b64len - 2] == '=') {
+			// Two padding chars - length must be multiple of 4
+			if (b64len % 4 != 0) return false;
+		} else {
+			// One padding char - length must be multiple of 4
+			if (b64len % 4 != 0) return false;
+		}
+	} else if (b64len % 4 != 0) {
+		// No padding - length must be multiple of 4
+		return false;
+	}
+	// Check output size is sufficient
+	unsigned int decodedLen = decode_base64_length((unsigned char*)b64, b64len);
+	if (decodedLen >= outSize) return false;
+	
+	// Now decode
+	decode_base64((const unsigned char*)b64, b64len, out);
+	return true;
+}
+
 unsigned int
 decode_base64_length_null(const char* const b64char, unsigned int* b64ssidlength) {
 	if (b64char == NULL) {
@@ -92,6 +128,7 @@ void cmdSet(CmdParser* parser) {
 			if (parser->getParamCount() < 3) {
 				logger.error("CMD SET BWIFI ERROR: Too few arguments");
 				logger.info("Syntax: SET BWIFI <B64SSID> <B64PASSWORD>");
+				logger.info("For plaintext, use: SET WIFI \"SSID\" \"PASSWORD\"");
 			} else {
 				const char* b64ssid = parser->getCmdParam(2);
 				const char* b64pass = parser->getCmdParam(3);
@@ -103,27 +140,27 @@ void cmdSet(CmdParser* parser) {
 					= decode_base64_length_null(b64pass, &b64passlength);
 
 				// alloc the strings and set them to 0 (null terminating)
-				char ssid[ssidlength + 1];
-				memset(ssid, 0, ssidlength + 1);
-				char pass[passlength + 1];
-				memset(pass, 0, passlength + 1);
+				// Use fixed max sizes to prevent stack overflow from invalid Base64
+				char ssid[65];  // Max 64 bytes + null
+				memset(ssid, 0, sizeof(ssid));
+				char pass[129];  // Max 128 bytes + null
+				memset(pass, 0, sizeof(pass));
 				// make a pointer to pass
 				char* ppass = pass;
-				decode_base64(
-					(const unsigned char*)b64ssid,
-					b64ssidlength,
-					(unsigned char*)ssid
-				);
+				// Decode Base64 SSID
+				if (!decode_base64_safe(b64ssid, b64ssidlength, (unsigned char*)ssid, sizeof(ssid))) {
+					logger.error("CMD SET BWIFI ERROR: Invalid Base64 SSID");
+					return;
+				}
 				if (!lengthCheck(ssid, 32, "CMD SET BWIFI", "SSID")) {
 					return;
 				}
 
 				if ((b64pass != NULL) && (b64passlength > 0)) {
-					decode_base64(
-						(const unsigned char*)b64pass,
-						b64passlength,
-						(unsigned char*)pass
-					);
+					if (!decode_base64_safe(b64pass, b64passlength, (unsigned char*)pass, sizeof(pass))) {
+						logger.error("CMD SET BWIFI ERROR: Invalid Base64 password");
+						return;
+					}
 					if (!lengthCheck(pass, 64, "CMD SET BWIFI", "Password")) {
 						return;
 					}
@@ -132,7 +169,7 @@ void cmdSet(CmdParser* parser) {
 					ppass = NULL;
 				}
 				WiFiNetwork::setWiFiCredentials(ssid, ppass);
-				logger.info("CMD SET BWIFI OK: New wifi credentials set, reconnecting");
+				logger.info("CMD SET BWIFI OK: New wifi credentials set for SSID '%s', reconnecting", ssid);
 			}
 		} else {
 			logger.error("CMD SET ERROR: Unrecognized variable to set");
