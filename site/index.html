@@ -6,8 +6,10 @@
   <title>SlimeVR BMI160 Firmware Installer</title>
   <meta name="description" content="Flash and configure SlimeVR BMI160 tracker firmware">
   <script>
-    // Global immediate showStep function available before any module load
-    window.showStep = function(stepIndex) {
+    // Global showStep hoisted before body so event handlers can call it.
+    // Declared as a function statement so the binding is hoisted and globally
+    // available as both window.showStep and a local symbol within later scripts.
+    function showStep(stepIndex) {
       const items = document.querySelectorAll('.step-item');
       const contents = document.querySelectorAll('.step-content');
       items.forEach((item, idx) => {
@@ -16,7 +18,8 @@
       contents.forEach((content, idx) => {
         content.classList.toggle('hidden', idx !== stepIndex);
       });
-    };
+    }
+    window.showStep = showStep;
   </script>
   <style>
     :root {
@@ -844,11 +847,7 @@
       return stepMap[state] !== undefined ? stepMap[state] : 1;
     }
 
-    // showStep is defined in the head script as window.showStep.
-    // Alias here so addEventListener handlers and other JS code can call it.
-    function showStep(stepIndex) {
-      window.showStep(stepIndex);
-    }
+    // showStep is defined globally in the head script; callable directly.
 
     function logToWifiLog(message, type = 'info') {
       const line = document.createElement('div');
