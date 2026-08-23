@@ -56,15 +56,17 @@ jobs:
 
       - name: Stage firmware build
         run: |
-          mkdir -p .pio-staging
-          cp -r FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/. .pio-staging/
+          mkdir -p pio-staging
+          cp -r FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/. pio-staging/
+          ls -la pio-staging/
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-build-${{ steps.version.outputs.short-sha }}
-          path: .pio-staging
+          path: pio-staging
           if-no-files-found: error
+          include-hidden-files: true
 
   site-test:
     name: Prepare and verify site bundle
