@@ -11,8 +11,12 @@
   <div class="container">
     <header>
       <div class="brand">
-        <h1>SlimeVR BMI160</h1>
-        <small>Firmware Installer</small>
+        <img src="assets/logo_positron.png" alt="Positron Elektronik" class="brand-logo">
+        <div class="brand-info">
+          <h1>SlimeVR BMI160</h1>
+          <small>Firmware Installer</small>
+          <small class="brand-tags">MCU / ESP32 WROOM &bull; IMU / BMI160 &bull; LINK / USB SERIAL</small>
+        </div>
       </div>
     </header>
     <div id="browser-warning" class="browser-warning">
@@ -84,7 +88,7 @@
           </p>
           <div class="action-area">
             <button id="btn-flash-firmware" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;">
-              ⚡ Flash SlimeVR BMI160 Tracker
+              &#9889; Flash SlimeVR BMI160 Tracker
             </button>
             <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
           </div>
@@ -110,7 +114,7 @@
                 <label for="wifi-password">Password</label>
                 <div class="input-wrapper">
                   <input type="password" id="wifi-password" class="form-input" placeholder="Enter password" autocomplete="new-password">
-                  <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">👁️</button>
+                  <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">&#128065;</button>
                 </div>
                 <p style="font-size: var(--t-xs); color: var(--muted); margin-top: var(--s1);">
                   Required: 8-63 characters for WPA/WPA2 networks
@@ -164,7 +168,7 @@
               <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
             </div>
             <pre id="live-log" style="margin-top: var(--s4); background: var(--ink-950); border: 1px solid var(--line); border-radius: 8px; padding: var(--s3); max-height: 50vh; overflow-y: auto; font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: var(--paper); white-space: pre-wrap; word-break: break-all;">// Serial log will appear here once streaming starts.
-            //</pre>
+//</pre>
           </div>
           <div class="action-area">
             <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
