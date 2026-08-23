@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="container">
-    <header>
+    <header class="site-header">
       <div class="brand">
         <img src="assets/logo_positron.png" alt="Positron Elektronik" class="brand-logo">
         <div class="brand-info">
@@ -17,6 +17,10 @@
           <small>Firmware Installer</small>
           <small class="brand-tags">MCU / ESP32 WROOM &bull; IMU / BMI160 &bull; LINK / USB SERIAL</small>
         </div>
+      </div>
+      <div class="header-meta" aria-label="Installer metadata">
+        <span class="eyebrow">POSITRON ELECTRONICS</span>
+        <span class="header-meta-value">LOCAL HARDWARE TOOL</span>
       </div>
     </header>
     <div id="browser-warning" class="browser-warning">
@@ -36,32 +40,37 @@
           <span>Firmware: <strong id="top-firmware-text" style="color: var(--warning);">Not Verified</strong></span>
         </div>
       </div>
+      <div class="status-group status-browser">
+        <span class="status-led ok"></span>
+        <span class="status-text">Web Serial Ready</span>
+      </div>
     </div>
     <div class="main-grid">
-      <nav class="step-rail">
+      <nav class="step-rail" aria-label="Firmware setup workflow">
         <div class="rail-title">Workflow</div>
         <div class="step-list">
           <div class="step-item active" data-step="0">
             <span class="step-number">01</span>
-            <span>Inspect Device</span>
+            <span class="step-copy"><strong>Inspect Device</strong><small>Check USB link</small></span>
           </div>
           <div class="step-item" data-step="1">
             <span class="step-number">02</span>
-            <span>Flash Firmware</span>
+            <span class="step-copy"><strong>Flash Firmware</strong><small>Install tracker image</small></span>
           </div>
           <div class="step-item" data-step="2">
             <span class="step-number">03</span>
-            <span>WiFi Setup</span>
+            <span class="step-copy"><strong>WiFi Setup</strong><small>Send credentials</small></span>
           </div>
           <div class="step-item" data-step="3">
             <span class="step-number">04</span>
-            <span>Verify</span>
+            <span class="step-copy"><strong>Verify</strong><small>Confirm connection</small></span>
           </div>
           <div class="step-item" data-step="4">
             <span class="step-number">05</span>
-            <span>Serial Log</span>
+            <span class="step-copy"><strong>Serial Log</strong><small>Inspect live output</small></span>
           </div>
         </div>
+        <div class="rail-note"><span class="rail-note-dot"></span>Changes stay in this browser</div>
       </nav>
       <main id="app-content">
         <section id="step-0" class="step-content">
@@ -71,6 +80,15 @@
             Click <strong>Connect Serial</strong> above to link your tracker port.
             Use the step rail on the left to navigate.
           </p>
+          <div class="device-hero">
+            <div class="device-hero-icon" aria-hidden="true">USB</div>
+            <div>
+              <span class="section-kicker">DEVICE CHECK</span>
+              <h3>Connect your tracker to begin</h3>
+              <p>Use a data-capable USB cable, then choose the serial port from the browser prompt.</p>
+            </div>
+            <button type="button" class="btn-secondary device-connect" onclick="document.getElementById('btn-top-serial')?.click()">Connect device</button>
+          </div>
           <div class="kpi-row">
             <div class="kpi">
               <span class="kpi-label">USB</span>
@@ -88,6 +106,17 @@
               <span class="kpi-label">Browser</span>
               <span class="kpi-value" id="kpi-browser">Web Serial</span>
             </div>
+          </div>
+          <div class="before-start">
+            <div>
+              <span class="section-kicker">BEFORE YOU START</span>
+              <strong>Four quick checks for a clean flash</strong>
+            </div>
+            <ul class="check-list">
+              <li>USB cable supports data</li>
+              <li>Serial monitor is closed</li>
+              <li>Chrome or Edge is running</li>
+            </ul>
           </div>
           <details>
             <summary>Troubleshooting</summary>
