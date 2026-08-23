@@ -488,16 +488,6 @@ header::after {
   filter: brightness(1.15);
 }
 
-/* Identity Badge */
-.hardware-identity {
-  background: var(--bg-panel-light);
-  border: 1px solid var(--line);
-  border-radius: var(--r-full);
-  padding: var(--s2) var(--s4);
-  font-size: var(--t-xs);
-  font-family: "Cascadia Code", monospace;
-}
-
 .device-id {
   font-family: "Cascadia Code", monospace;
 }
