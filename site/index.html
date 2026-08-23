@@ -83,17 +83,21 @@
         <section id="step-1" class="step-content hidden">
           <h2 class="step-title">Flash Firmware</h2>
           <p class="step-instruction">
-            This will flash the generic SlimeVR BMI160 firmware to your tracker.
-            Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation will be preserved.
+            This will flash the SlimeVR BMI160 firmware to your tracker over USB.
+            Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation are preserved.
           </p>
           <div class="action-area">
-            <button id="btn-flash-firmware" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;">
-              &#9889; Flash SlimeVR BMI160 Tracker
-            </button>
-            <p id="flash-status" class="status-line" style="margin-top: var(--s3);"></p>
+            <esp-web-install-button id="ewt-button" manifest="manifest.json">
+              <button id="btn-flash-firmware" slot="activate" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;" type="button">
+                &#9889; Flash SlimeVR BMI160 Tracker
+              </button>
+              <span slot="unsupported">Web Serial is unavailable in this browser. Use Chrome or Edge on Windows.</span>
+              <span slot="not-allowed">HTTP not allowed. Open this page over HTTPS.</span>
+            </esp-web-install-button>
           </div>
           <p class="step-instruction" style="font-size: var(--t-sm);">
             <strong>Note:</strong> After flashing, the device will reboot. Wait for the serial port to reappear before proceeding to WiFi setup.
+            Don't see a button? <a href="firmware/" style="color: var(--signal);">Browse released firmware versions</a>.
           </p>
         </section>
         <section id="step-2" class="step-content hidden">
@@ -116,7 +120,7 @@
                   <input type="password" id="wifi-password" class="form-input" placeholder="Enter password" autocomplete="new-password">
                   <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">&#128065;</button>
                 </div>
-                <p style="font-size: var(--t-xs); color: var(--muted); margin-top: var(--s1);">
+                <p style="font-size: var(--t-xs); color: var(--text-muted); margin-top: var(--s1);">
                   Required: 8-63 characters for WPA/WPA2 networks
                 </p>
               </div>
@@ -161,8 +165,8 @@
           <div class="action-area">
             <div style="display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center;">
               <button id="btn-log-connect" class="btn-primary" style="max-width: 200px;">Start Streaming</button>
-              <button id="btn-log-clear" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--muted);">Clear</button>
-              <label style="display: flex; gap: var(--s2); align-items: center; font-size: var(--t-sm); color: var(--muted);">
+              <button id="btn-log-clear" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var\(--text-muted\);">Clear</button>
+              <label style="display: flex; gap: var(--s2); align-items: center; font-size: var(--t-sm); color: var\(--text-muted\);">
                 <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
               </label>
               <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
@@ -172,7 +176,7 @@
           </div>
           <div class="action-area">
             <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
-            <ul style="list-style: none; font-size: var(--t-base); color: var(--muted);">
+            <ul style="list-style: none; font-size: var(--t-base); color: var\(--text-muted\);">
               <li>115200 baud is used to match the firmware default.</li>
               <li>If the port is already open in another tab, close it first.</li>
               <li>Re-plug the tracker if you see no output after pressing Start.</li>
@@ -195,67 +199,6 @@
     </footer>
   </div>
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
-  <script type="module">
-    import 'https://unpkg.com/esp-web-tools@10/dist/web/install-dialog-im156JnI.js?module';
-    customElements.whenDefined('ewt-install-dialog').then(() => {
-      const Cls = customElements.get('ewt-install-dialog');
-      if (!Cls || Cls.__flashPatched) return;
-      Cls.__flashPatched = true;
-      const origUpdated = Cls.prototype.updated;
-      Cls.prototype.updated = function (changedProps) {
-        if (origUpdated) origUpdated.call(this, changedProps);
-        const root = this.shadowRoot;
-        if (!root) return;
-        queueMicrotask(() => {
-          if (!this.shadowRoot) return;
-          const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_TEXT);
-          let node;
-          while ((node = walker.nextNode())) {
-            if (node.nodeValue && node.nodeValue.includes('Install SlimeVR BMI160 Tracker')) {
-              node.nodeValue = node.nodeValue.replaceAll('Install SlimeVR BMI160 Tracker', 'Flash SlimeVR BMI160 Tracker');
-            }
-          }
-        });
-      };
-      const origConfirm = Cls.prototype._confirmInstall;
-      Cls.prototype._confirmInstall = async function () {
-        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-        console.log('[Flash] _confirmInstall called');
-        try {
-          if (this.port) {
-            console.log('[Flash] Step 1: manual reset sequence (port open already)');
-            try {
-              await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
-              await sleep(120);
-              console.log('[Flash] Step 1a: DTR=false, RTS=true');
-              await this.port.setSignals({ dataTerminalReady: false, requestToSend: true });
-              await sleep(120);
-              console.log('[Flash] Step 1b: DTR=true, RTS=true');
-              await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
-              await sleep(120);
-              console.log('[Flash] Step 1c: DTR=true, RTS=false');
-              await this.port.setSignals({ dataTerminalReady: true, requestToSend: false });
-              await sleep(400);
-              console.log('[Flash] Step 1d: manual reset complete');
-            } catch (sigErr) {
-              console.warn('[Flash] Manual bootloader reset failed; falling back to library reset:', sigErr);
-            }
-          }
-        } catch (outerErr) {
-          console.warn('[Flash] Bootloader prep wrapper error (continuing):', outerErr);
-        }
-        console.log('[Flash] Calling original _confirmInstall');
-        try {
-          const result = await origConfirm.apply(this, arguments);
-          console.log('[Flash] Original _confirmInstall finished');
-          return result;
-        } catch (e) {
-          console.error('[Flash] Original _confirmInstall threw:', e);
-          throw e;
-        }
-      };
-    }).catch(err => console.warn('ewt-install-dialog patch skipped:', err));
-  </script>
   <script src="app.js"></script>
 </body>
 </html>

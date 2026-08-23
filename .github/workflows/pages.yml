@@ -1,0 +1,143 @@
+name: Build Firmware and Deploy Web Flasher
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'FIRMWARE/SlimeVR-Tracker-ESP/**'
+      - 'scripts/**'
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firmware:
+    name: Build ESP32 firmware
+    runs-on: ubuntu-latest
+    outputs:
+      short-sha: ${{ steps.version.outputs.short-sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Resolve release id
+        id: version
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short-sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            FIRMWARE/SlimeVR-Tracker-ESP/cache
+          key: pio-${{ runner.os }}-${{ hashFiles('FIRMWARE/SlimeVR-Tracker-ESP/platformio.ini', 'FIRMWARE/SlimeVR-Tracker-ESP/scripts/get_git_commit.py') }}
+          restore-keys: |
+            pio-${{ runner.os }}-
+
+      - name: Install PlatformIO 6.1.19
+        run: pip install --quiet platformio==6.1.19
+
+      - name: Build esp32 environment
+        working-directory: FIRMWARE/SlimeVR-Tracker-ESP
+        run: pio run -e esp32
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-build-${{ steps.version.outputs.short-sha }}
+          path: FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/*.bin
+          if-no-files-found: error
+
+  site-test:
+    name: Prepare and verify site bundle
+    needs: firmware
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download firmware build
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-build-${{ needs.firmware.outputs.short-sha }}
+          path: build-output/esp32
+
+      - name: Resolve release id
+        id: version
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "release-id=positron-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Run prepare_pages.py
+        run: |
+          python scripts/prepare_pages.py \
+            --build-dir build-output \
+            --site-dir site \
+            --output-dir dist \
+            --release-id "${{ steps.version.outputs.release-id }}"
+
+      - name: Run verify_release.py
+        run: python scripts/verify_release.py --dist-dir dist
+
+      - name: Validate HTML
+        run: |
+          python -c "import sys; sys.exit(0 if open('dist/index.html', encoding='utf-8').read().count('<img class=\"brand-logo\"') == 1 else 1)"
+
+      - name: Smoke check dist served as HTTP 200
+        run: |
+          python -m http.server --directory dist 8765 >/tmp/srv.log 2>&1 &
+          SRV_PID=$!
+          sleep 1
+          trap "kill $SRV_PID" EXIT
+          for path in / /index.html /manifest.json /assets/positron.jpg /assets/logo_positron.png; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8765$path")
+            if [ "$CODE" != "200" ]; then
+              echo "Asset not 200: $path -> $CODE"
+              exit 1
+            fi
+          done
+          BIN_PATH=$(python -c "import json; m=json.loads(open('dist/manifest.json', encoding='utf-8').read()); print(m['builds'][0]['parts'][0]['path'])")
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8765/$BIN_PATH")
+          if [ "$CODE" != "200" ]; then
+            echo "Firmware binary not 200: /$BIN_PATH -> $CODE"
+            exit 1
+          fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: [firmware, site-test]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
