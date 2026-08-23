@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi Software SlimeVR-BMI160</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background:#f8fafc; color:#1e293b; line-height:1.6; padding:2rem 1rem; }
+        .container { max-width:1000px; margin:0 auto; background:#fff; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.08); padding:2.5rem; }
+        h1 { font-size:2.4rem; font-weight:700; margin-bottom:0.5rem; background:linear-gradient(135deg,#0f172a,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        h2 { font-size:1.8rem; margin:2rem 0 1rem; border-bottom:3px solid #e2e8f0; padding-bottom:0.5rem; }
+        h3 { font-size:1.3rem; margin:1.5rem 0 0.8rem; color:#0f172a; }
+        .badge { display:inline-block; background:#3b82f6; color:#fff; font-size:0.75rem; padding:0.2rem 0.8rem; border-radius:20px; font-weight:600; }
+        .step-grid { display:grid; gap:1.5rem; margin:1.5rem 0; }
+        .step-card { background:#f1f5f9; border-radius:16px; padding:1.2rem 1.5rem; border-left:6px solid #3b82f6; }
+        .step-card strong { display:block; font-size:1.1rem; }
+        .step-card img { width:100%; border-radius:12px; margin:0.8rem 0; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+        .placeholder-img { background:#e2e8f0; border-radius:12px; height:200px; display:flex; align-items:center; justify-content:center; color:#64748b; font-style:italic; margin:0.8rem 0; }
+        code { background:#e2e8f0; padding:0.2rem 0.5rem; border-radius:6px; font-size:0.9rem; }
+        pre { background:#0f172a; color:#e2e8f0; padding:1rem; border-radius:12px; overflow-x:auto; font-size:0.9rem; }
+        table { width:100%; border-collapse:collapse; margin:1rem 0; }
+        th, td { border:1px solid #e2e8f0; padding:0.6rem 1rem; text-align:left; }
+        th { background:#f1f5f9; font-weight:600; }
+        .footer { margin-top:2.5rem; padding-top:1.5rem; border-top:2px solid #e2e8f0; font-size:0.9rem; color:#64748b; text-align:center; }
+        @media (max-width:640px) { .container { padding:1.2rem; } h1 { font-size:1.8rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📘 Dokumentasi Software SlimeVR-BMI160</h1>
+    <p style="font-size:1.1rem; margin-bottom:1.5rem;">Panduan lengkap menggunakan <strong>Web Installer</strong> dan <strong>PlatformIO</strong> untuk tracker ESP32 + BMI160.</p>
+
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
+        <span class="badge">Web Installer</span>
+        <span class="badge" style="background:#64748b;">PlatformIO</span>
+        <span class="badge" style="background:#0f172a;">ESP32</span>
+    </div>
+
+    <h2>🎯 Pendahuluan</h2>
+    <p>Tracker SlimeVR-BMI160 adalah perangkat full-body tracking DIY berbasis ESP32 dan sensor BMI160. Dokumentasi ini memandu Anda melalui dua metode utama:</p>
+    <ul style="margin:0.5rem 0 1.5rem 1.5rem;">
+        <li><strong>🌐 Web Installer</strong> — cara termudah, tanpa instalasi software (direkomendasikan)</li>
+        <li><strong>⚙️ Manual (PlatformIO)</strong> — untuk pengembang yang ingin mengompilasi sendiri</li>
+    </ul>
+
+    <h2>📸 Panduan Bergambar Web Installer</h2>
+
+    <div class="step-grid">
+        <div class="step-card">
+            <strong>Langkah 1: Buka Halaman Web Installer</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Halaman utama Web Installer</div>
+            <p>Buka <a href="https://juarendra.github.io/SlimeVR-BMI160/" target="_blank">SlimeVR BMI160 Web Installer</a> di Chrome/Edge.</p>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 2: Hubungkan Tracker &amp; Connect</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Tombol Connect</div>
+            <ol style="margin-left:1.2rem;">
+                <li>Colokkan tracker via USB (pastikan kabel data).</li>
+                <li>Klik tombol <strong>Connect</strong> (pojok kiri atas).</li>
+                <li>Pilih port serial yang muncul (biasanya "USB Serial Port" atau COMx).</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 3: Verifikasi Koneksi</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Status terhubung</div>
+            <p>Jika berhasil: status "Serial connected" berwarna hijau dan "Firmware verified" (jika firmware sudah ada).</p>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 4: Flash Firmware</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Tombol Flash Tracker</div>
+            <ol style="margin-left:1.2rem;">
+                <li>Pindah ke step 2 (klik "02 Flash firmware" di sidebar).</li>
+                <li>Klik tombol <strong>Flash Tracker</strong>.</li>
+                <li>Konfirmasi port dan tunggu hingga selesai (jangan cabut kabel!).</li>
+            </ol>
+            <p>⏱️ Proses flashing berlangsung ±10 detik. Tracker reboot otomatis.</p>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 5: Konfigurasi WiFi</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Form WiFi</div>
+            <ol style="margin-left:1.2rem;">
+                <li>Pindah ke step 3.</li>
+                <li>Masukkan <strong>SSID</strong> dan <strong>Password</strong> WiFi Anda.</li>
+                <li>Klik <strong>Save &amp; connect WiFi</strong>.</li>
+                <li>Tunggu hingga muncul "Connected" dan alamat IP.</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 6: Verifikasi di SlimeVR Server</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Tracker muncul di server</div>
+            <p>Buka SlimeVR Server di PC — tracker akan muncul otomatis (pastikan satu jaringan).</p>
+        </div>
+
+        <div class="step-card">
+            <strong>Langkah 7: Serial Log (Debugging)</strong>
+            <div class="placeholder-img">🖼️ Screenshot: Serial log</div>
+            <p>Gunakan step 5 untuk melihat output real-time dari tracker (boot, WiFi, IMU, koneksi server).</p>
+        </div>
+    </div>
+
+    <h2>⚙️ Metode Manual (PlatformIO)</h2>
+
+    <h3>Prasyarat</h3>
+    <ul style="margin:0.5rem 0 1.5rem 1.5rem;">
+        <li>VS Code + ekstensi <strong>PlatformIO IDE</strong></li>
+        <li>Kabel USB data</li>
+        <li>Tracker SlimeVR-BMI160 terhubung</li>
+    </ul>
+
+    <h3>Langkah-langkah</h3>
+
+    <ol style="margin-left:1.5rem; margin-bottom:1.5rem;">
+        <li><strong>Clone Repositori</strong>
+            <pre>git clone https://github.com/juarendra/SlimeVR-BMI160.git
+cd SlimeVR-BMI160</pre>
+        </li>
+        <li><strong>Buka Proyek Firmware</strong><br>
+            Buka folder <code>FIRMWARE/SlimeVR-Tracker-ESP-0.4.0/</code> di VS Code. PlatformIO akan menginstal dependensi otomatis.
+        </li>
+        <li><strong>Konfigurasi WiFi (Hardcode)</strong><br>
+            Buka <code>platformio.ini</code>, tambahkan di <code>[env:esp32dev]</code>:
+            <pre>build_flags =
+    -DWIFI_SSID='"NAMA_WIFI_ANDA"'
+    -DWIFI_PASSWORD='"PASSWORD_WIFI_ANDA"'</pre>
+        </li>
+        <li><strong>Erase Flash (Opsional)</strong>
+            <pre>pio run --target erase</pre>
+        </li>
+        <li><strong>Upload Firmware</strong><br>
+            Klik tombol <strong>Upload</strong> (panah kanan) di toolbar PlatformIO. Tunggu hingga "SUCCESS".
+        </li>
+        <li><strong>Monitor Serial</strong><br>
+            Klik ikon <strong>Serial Monitor</strong> (colokan), pastikan baud rate <code>115200</code>.
+        </li>
+    </ol>
+
+    <h3>Output Serial yang Diharapkan</h3>
+    <pre>[20:13:30] [INFO] [main] Starting SlimeVR tracker...
+[20:13:31] [INFO] [WIFI] Connecting to "NAMA_WIFI_ANDA"
+[20:13:34] [INFO] [WIFI] WiFi connected. IP: 192.168.1.10
+[20:13:34] [INFO] [I2C] Found BMI160 at address 0x68
+[20:13:35] [INFO] [SERVER] Connected to server!
+[20:13:36] [INFO] [OUTPUT:0] Sensor 0 reporting: ...</pre>
+
+    <h2>🔧 Perintah Serial untuk Provisioning (Advanced)</h2>
+    <ul style="margin:0.5rem 0 1.5rem 1.5rem;">
+        <li><code>GET INFO</code> — tampilkan informasi perangkat.</li>
+        <li><code>SET BWIFI &lt;base64_ssid&gt; &lt;base64_pass&gt;</code> — kirim kredensial WiFi. Respon:
+            <ul>
+                <li><code>[WIFI-PROVISION] ACCEPTED</code></li>
+                <li><code>[WIFI-PROVISION] CONNECTED &lt;IP&gt;</code></li>
+                <li><code>[WIFI-PROVISION] FAILED &lt;reason&gt;</code></li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>🐛 Troubleshooting Lanjutan</h2>
+    <table>
+        <thead>
+            <tr><th>Masalah</th><th>Solusi</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Sensor tidak terdeteksi</strong></td><td>Periksa koneksi I2C, pastikan header BMI160 terpasang. Coba <code>i2cscan</code>.</td></tr>
+            <tr><td><strong>WiFi gagal konek</strong></td><td>Pastikan password benar, gunakan jaringan 2.4 GHz.</td></tr>
+            <tr><td><strong>Tracker tidak muncul di server</strong></td><td>Pastikan server berjalan dan firewall tidak memblokir.</td></tr>
+            <tr><td><strong>Flashing manual gagal</strong></td><td>Periksa driver USB, coba port lain, restart VS Code.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>📚 Sumber Daya Tambahan</h2>
+    <ul style="margin:0.5rem 0 1.5rem 1.5rem;">
+        <li><a href="https://www.slimevr.dev/" target="_blank">SlimeVR Official</a></li>
+        <li><a href="https://github.com/juarendra/SlimeVR-BMI160" target="_blank">GitHub Repo</a></li>
+        <li><a href="../README.md">README Utama</a></li>
+    </ul>
+
+    <div class="footer">
+        Dokumentasi terakhir diperbarui: Agustus 2026
+    </div>
+</div>
+</body>
+</html>
