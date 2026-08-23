@@ -3,63 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SlimeVR BMI160 Firmware Installer</title>
-  <meta name="description" content="Flash and configure SlimeVR BMI160 tracker firmware">
+  <title>SlimeVR BMI160 — Positron Installer Workspace</title>
+  <meta name="description" content="Flash and provision your SlimeVR BMI160 tracker directly from the browser over USB Web Serial.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <header class="site-header">
+  <div class="app">
+    <header class="header">
       <div class="brand">
-        <img src="assets/logo_positron.png" alt="Positron Elektronik" class="brand-logo">
-        <div class="brand-info">
-          <h1>SlimeVR BMI160</h1>
-          <small>Firmware Installer</small>
-          <small class="brand-tags">MCU / ESP32 WROOM &bull; IMU / BMI160 &bull; LINK / USB SERIAL</small>
+        <div class="brand-mark">
+          <img src="assets/logo_positron.png" alt="Positron Elektronik">
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">SlimeVR BMI160</h1>
+          <div class="brand-sub">
+            <span><strong>Positron</strong> installer workspace</span>
+            <span class="dot">·</span>
+            <span>ESP32 WROOM</span>
+            <span class="dot">·</span>
+            <span>BMI160 IMU</span>
+          </div>
         </div>
       </div>
-      <div class="header-meta" aria-label="Installer metadata">
-        <span class="eyebrow">POSITRON ELECTRONICS</span>
-        <span class="header-meta-value">LOCAL HARDWARE TOOL</span>
+      <div class="header-meta">
+        <span class="eyebrow">Web Serial ready</span>
+        <span class="eyebrow-muted">v1.0 · local hardware tool</span>
       </div>
     </header>
+
     <div id="browser-warning" class="browser-warning">
-      <strong>Browser not supported:</strong> This tool requires Google Chrome or Microsoft Edge on Windows. 
-      Your browser does not support Web Serial API.
+      Browser not supported — this tool requires Google Chrome or Microsoft Edge on Windows. Web Serial API unavailable.
     </div>
-    <div class="status-bar">
-      <div class="status-group">
-        <button id="btn-top-serial" class="btn-serial-connect">
-          <span class="status-led" id="top-serial-led" style="background: var(--danger);"></span>
-          <span id="top-serial-text">Connect Serial (Disconnected)</span>
+
+    <section class="status-bar" aria-label="Connection status">
+      <div class="status-tile" id="tile-serial">
+        <span class="status-dot is-error" id="top-serial-led"></span>
+        <div class="status-text">
+          <strong id="top-serial-text">Serial disconnected</strong>
+          <small>Click to choose port</small>
+        </div>
+        <button id="btn-top-serial" class="btn btn-secondary" type="button" aria-label="Toggle serial port">
+          Connect
         </button>
       </div>
-      <div class="status-group">
-        <div class="hardware-identity" id="top-firmware-badge" style="border-color: var(--line); color: var(--paper);">
-          <span class="identity-dot" id="top-firmware-dot" style="background: var(--warning);"></span>
-          <span>Firmware: <strong id="top-firmware-text" style="color: var(--warning);">Not Verified</strong></span>
+      <div class="status-tile is-warning" id="tile-firmware">
+        <span class="status-dot is-warn" id="top-firmware-dot"></span>
+        <div class="status-text">
+          <strong id="top-firmware-text">Firmware not verified</strong>
+          <small>Identity pending handshake</small>
         </div>
       </div>
-      <div class="status-group status-browser">
-        <span class="status-led ok"></span>
-        <span class="status-text">Web Serial Ready</span>
+      <div class="status-tile is-ok is-pulse" id="tile-browser">
+        <span class="status-dot is-ok"></span>
+        <div class="status-text">
+          <strong id="kpi-browser-title">Web Serial ready</strong>
+          <small id="kpi-browser">Detecting browser…</small>
+        </div>
       </div>
-    </div>
+    </section>
+
     <div class="main-grid">
-      <nav class="step-rail" aria-label="Firmware setup workflow">
-        <div class="rail-title">Workflow</div>
+      <nav class="rail" aria-label="Firmware setup workflow">
+        <header class="rail-header">
+          <span class="rail-eyebrow">Workflow</span>
+          <span class="rail-step-count">5 steps · ~3 min</span>
+        </header>
         <div class="step-list">
-          <div class="step-item active" data-step="0">
+          <div class="step-item is-active" data-step="0">
             <span class="step-number">01</span>
-            <span class="step-copy"><strong>Inspect Device</strong><small>Check USB link</small></span>
+            <span class="step-copy"><strong>Inspect device</strong><small>Verify USB link</small></span>
           </div>
           <div class="step-item" data-step="1">
             <span class="step-number">02</span>
-            <span class="step-copy"><strong>Flash Firmware</strong><small>Install tracker image</small></span>
+            <span class="step-copy"><strong>Flash firmware</strong><small>Install tracker image</small></span>
           </div>
           <div class="step-item" data-step="2">
             <span class="step-number">03</span>
-            <span class="step-copy"><strong>WiFi Setup</strong><small>Send credentials</small></span>
+            <span class="step-copy"><strong>WiFi setup</strong><small>Send credentials</small></span>
           </div>
           <div class="step-item" data-step="3">
             <span class="step-number">04</span>
@@ -67,204 +87,295 @@
           </div>
           <div class="step-item" data-step="4">
             <span class="step-number">05</span>
-            <span class="step-copy"><strong>Serial Log</strong><small>Inspect live output</small></span>
+            <span class="step-copy"><strong>Serial log</strong><small>Live diagnostics</small></span>
           </div>
         </div>
-        <div class="rail-note"><span class="rail-note-dot"></span>Changes stay in this browser</div>
+        <div class="rail-note">All credentials stay in this browser — never uploaded.</div>
       </nav>
-      <main id="app-content">
-        <section id="step-0" class="step-content">
-          <h2 class="step-title">Inspect Device</h2>
-          <p class="step-instruction">
-            Ensure your SlimeVR BMI160 tracker is connected to this computer via USB.
-            Click <strong>Connect Serial</strong> above to link your tracker port.
-            Use the step rail on the left to navigate.
-          </p>
+
+      <main>
+        <!-- ============================== STEP 0: INSPECT ============================== -->
+        <section id="step-0" class="step-panel step-content">
+          <header class="step-header">
+            <span class="section-kicker">Step 01 · Inspect device</span>
+            <h2 class="step-title">Connect your tracker to begin</h2>
+            <p class="step-subtitle">
+              Plug your SlimeVR BMI160 tracker into a USB port, then use the
+              <strong>Connect</strong> button to choose the serial port. Web Serial
+              will handshake with the device to verify the firmware identity.
+            </p>
+          </header>
+
           <div class="device-hero">
-            <div class="device-hero-icon" aria-hidden="true">USB</div>
-            <div>
-              <span class="section-kicker">DEVICE CHECK</span>
-              <h3>Connect your tracker to begin</h3>
-              <p>Use a data-capable USB cable, then choose the serial port from the browser prompt.</p>
+            <div class="device-art is-disconnected" id="device-art">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="7" width="14" height="10" rx="2"/>
+                <path d="M7 7V5h4v2"/>
+                <path d="M17 11h3v2h-3"/>
+                <path d="M21 12h1"/>
+              </svg>
             </div>
-            <button type="button" class="btn-secondary device-connect" onclick="document.getElementById('btn-top-serial')?.click()">Connect device</button>
+            <div class="device-text">
+              <strong id="device-status-title">No device detected</strong>
+              <small id="device-status-sub">Plug in the tracker, then choose the serial port from the browser prompt.</small>
+            </div>
+            <button type="button" class="btn btn-secondary" id="device-connect" onclick="document.getElementById('btn-top-serial')?.click()">
+              Choose port
+            </button>
           </div>
-          <div class="kpi-row">
+
+          <div class="kpi-grid" aria-label="Diagnostic snapshot">
             <div class="kpi">
               <span class="kpi-label">USB</span>
               <span class="kpi-value" id="kpi-usb">No device</span>
+              <span class="kpi-meta">Web Serial handshake</span>
             </div>
             <div class="kpi">
               <span class="kpi-label">Port</span>
-              <span class="kpi-value" id="kpi-port">&mdash;</span>
+              <span class="kpi-value" id="kpi-port">—</span>
+              <span class="kpi-meta">Awaiting selection</span>
             </div>
             <div class="kpi">
               <span class="kpi-label">Firmware</span>
               <span class="kpi-value" id="kpi-fw">Ready to flash</span>
+              <span class="kpi-meta">Identity not verified</span>
             </div>
             <div class="kpi">
               <span class="kpi-label">Browser</span>
               <span class="kpi-value" id="kpi-browser">Web Serial</span>
+              <span class="kpi-meta">v1.0 · secure context</span>
             </div>
           </div>
-          <div class="before-start">
-            <div>
-              <span class="section-kicker">BEFORE YOU START</span>
+
+          <div class="checklist-card">
+            <div class="checklist-card-head">
+              <span class="section-kicker">Before you start</span>
               <strong>Four quick checks for a clean flash</strong>
+              <small>Spend 30 seconds here to avoid most failures.</small>
             </div>
             <ul class="check-list">
               <li>USB cable supports data</li>
-              <li>Serial monitor is closed</li>
-              <li>Chrome or Edge is running</li>
+              <li>Serial monitor closed</li>
+              <li>Chrome or Edge running</li>
+              <li>HTTPS/local served</li>
             </ul>
           </div>
-          <details>
-            <summary>Troubleshooting</summary>
-            <ul class="recovery-list">
-              <li>Install CH340/CP2102 USB driver if device not detected</li>
-              <li>Try different USB cable (must support data transfer)</li>
-              <li>Check Device Manager for COM port assignment</li>
-              <li>Close PlatformIO/Serial Monitor if open</li>
-            </ul>
-          </details>
         </section>
-        <section id="step-1" class="step-content hidden">
-          <div class="hero-cta">
-            <div class="hero-cta-art">
-              <img src="assets/logo_positron.png" alt="SlimeVR Tracker Logo" class="hero-logo" />
-              <div class="hero-chip-row">
-                <span class="hero-chip">ESP32</span>
-                <span class="hero-chip">BMI160 IMU</span>
-                <span class="hero-chip">MPU-6050 Compatible</span>
+
+        <!-- ============================== STEP 1: FLASH ============================== -->
+        <section id="step-1" class="step-panel step-content hidden">
+          <header class="step-header">
+            <span class="section-kicker">Step 02 · Flash firmware</span>
+            <h2 class="step-title">Erase & write the tracker image</h2>
+            <p class="step-subtitle">
+              Web Serial + ESP Web Tools will write the signed firmware directly
+              to the ESP32. Your custom resistor divider <strong>(R1=1kΩ, R2=1.82kΩ)</strong>
+              and IMU orientation are baked into the image.
+            </p>
+          </header>
+
+          <div class="flash-hero">
+            <div class="flash-art">
+              <div class="flash-art-glow"></div>
+              <img src="assets/logo_positron.png" alt="SlimeVR BMI160 tracker">
+              <div class="flash-art-chip-row">
+                <span class="chip">ESP32-WROOM-32</span>
+                <span class="chip">BMI160 IMU</span>
+                <span class="chip">MPU-6050 drop-in</span>
+                <span class="chip">R1=1k · R2=1.82k</span>
               </div>
             </div>
-            <div class="hero-cta-body">
-              <h2 class="step-title">Flash Firmware</h2>
-              <p class="step-instruction">
-                Flash the SlimeVR BMI160 firmware directly from your browser over USB.
-                Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation are baked in.
-              </p>
-              <div class="action-area">
-                <esp-web-install-button id="ewt-button" manifest="manifest.json">
-                  <button id="btn-flash-firmware" slot="activate" class="btn-primary btn-hero" type="button">
-                    <span class="btn-icon">&#9889;</span>
-                    <span class="btn-label">
-                      <span class="btn-label-main">Flash Tracker</span>
-                      <span class="btn-label-sub">USB &middot; Web Serial</span>
-                    </span>
-                  </button>
-                  <span slot="unsupported">Web Serial is unavailable in this browser. Use Chrome or Edge on Windows.</span>
-                  <span slot="not-allowed">HTTP not allowed. Open this page over HTTPS.</span>
-                </esp-web-install-button>
-                <a href="firmware/" class="btn-secondary btn-browse">
-                  Browse released firmware &rarr;
-                </a>
+
+            <div class="flash-actions">
+              <esp-web-install-button id="ewt-button" manifest="manifest.json">
+                <button id="btn-flash-firmware" slot="activate" type="button" class="btn btn-primary btn-hero">
+                  <span class="btn-icon" aria-hidden="true">⚡</span>
+                  <span class="btn-label">
+                    <span class="btn-label-main">Flash Tracker</span>
+                    <span class="btn-label-sub">USB · Web Serial</span>
+                  </span>
+                </button>
+                <span slot="unsupported">Web Serial is unavailable in this browser. Use Chrome or Edge on Windows.</span>
+                <span slot="not-allowed">HTTP not allowed. Open this page over HTTPS.</span>
+              </esp-web-install-button>
+              <a class="btn btn-secondary" href="firmware/" style="width:100%; height:44px;">
+                Browse released firmware →
+              </a>
+              <div class="flash-meta">
+                <div class="flash-meta-row"><span>Image</span><span>firmware.bin</span></div>
+                <div class="flash-meta-row"><span>Offset</span><span>0x10000</span></div>
+                <div class="flash-meta-row"><span>Mode</span><span>DIO · 40 MHz</span></div>
+                <div class="flash-meta-row"><span>Chip</span><span>ESP32</span></div>
               </div>
-              <p class="step-instruction step-footnote">
-                <strong>Note:</strong> After flashing, the device reboots. Wait for the serial port to reappear before WiFi setup.
-              </p>
             </div>
           </div>
-        </section>
-        <section id="step-2" class="step-content hidden">
-          <h2 class="step-title">WiFi Setup</h2>
-          <p class="step-instruction">
-            Enter your WiFi credentials. They will be sent directly to your tracker over USB serial.
-            Credentials are never sent to GitHub or any server.
+
+          <p class="step-subtitle">
+            <strong style="color: var(--warning);">Tip:</strong>
+            After flashing, the device reboots. Wait for the serial port to
+            reappear (~5 s) before sending WiFi credentials in step 03.
           </p>
-          <div class="action-area">
-            <div class="wifi-form" id="wifi-form">
-              <div class="form-group">
-                <label for="wifi-ssid">WiFi Network Name (SSID)</label>
-                <div class="input-wrapper">
-                  <input type="text" id="wifi-ssid" class="form-input" placeholder="e.g., HomeWiFi" autocomplete="off" spellcheck="false">
+        </section>
+
+        <!-- ============================== STEP 2: WIFI ============================== -->
+        <section id="step-2" class="step-panel step-content hidden">
+          <header class="step-header">
+            <span class="section-kicker">Step 03 · WiFi setup</span>
+            <h2 class="step-title">Send credentials to the tracker</h2>
+            <p class="step-subtitle">
+              Credentials travel only over the local USB serial link — never
+              via the browser or any server. Use <strong>8–63 chars</strong>
+              for WPA/WPA2 networks.
+            </p>
+          </header>
+
+          <div class="form-card">
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="wifi-ssid">Network name (SSID)</label>
+                <div class="form-input-wrap">
+                  <input type="text" id="wifi-ssid" class="form-input"
+                    placeholder="e.g. HomeWiFi" autocomplete="off" spellcheck="false" maxlength="32">
                 </div>
+                <span class="form-help">1–32 bytes · case sensitive</span>
               </div>
-              <div class="form-group">
+              <div class="form-row">
                 <label for="wifi-password">Password</label>
-                <div class="input-wrapper">
-                  <input type="password" id="wifi-password" class="form-input" placeholder="Enter password" autocomplete="new-password">
-                  <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">&#128065;</button>
+                <div class="form-input-wrap">
+                  <input type="password" id="wifi-password" class="form-input"
+                    placeholder="Enter password" autocomplete="new-password" maxlength="63">
+                  <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password" aria-pressed="false">👁️</button>
                 </div>
-                <p style="font-size: var(--t-xs); color: var(--text-muted); margin-top: var(--s1);">
-                  Required: 8-63 characters for WPA/WPA2 networks
-                </p>
-              </div>
-              <div style="display: flex; gap: var(--s3); flex-wrap: wrap;">
-                <button id="btn-connect-wifi" class="btn-primary">Save & Connect WiFi</button>
-                <button id="btn-retry-wifi" class="btn-primary hidden" style="background: var(--ink-850); border: 1px solid var(--line);">Retry</button>
+                <span class="form-help" id="wifi-help">8–63 characters · WPA / WPA2</span>
               </div>
             </div>
+            <div class="form-actions">
+              <button id="btn-connect-wifi" type="button" class="btn btn-primary">Save & connect WiFi</button>
+              <button id="btn-retry-wifi" type="button" class="btn btn-secondary hidden">Retry</button>
+            </div>
           </div>
-          <div id="wifi-status" class="status-log">
-            <div class="status-line">Waiting for WiFi credentials...</div>
+
+          <div>
+            <span class="section-kicker">Activity log</span>
+            <div id="wifi-status" class="status-log" aria-live="polite">
+              <div class="status-line is-info">Waiting for WiFi credentials…</div>
+            </div>
           </div>
         </section>
-        <section id="step-3" class="step-content hidden">
-          <h2 class="step-title">Verify</h2>
-          <p class="step-instruction">
-            Your tracker is now configured. Wait for it to connect to WiFi and appear in SlimeVR Server.
-          </p>
-          <div class="action-area">
-            <div class="status-log" id="verify-log">
-              <div class="status-line success">WiFi credentials accepted</div>
-              <div class="status-line wait">Waiting for connection...</div>
+
+        <!-- ============================== STEP 3: VERIFY ============================== -->
+        <section id="step-3" class="step-panel step-content hidden">
+          <header class="step-header">
+            <span class="section-kicker">Step 04 · Verify</span>
+            <h2 class="step-title">Confirm the tracker is online</h2>
+            <p class="step-subtitle">
+              Your tracker is now configured. Wait for it to connect to the
+              network and appear in SlimeVR Server, then run final checks.
+            </p>
+          </header>
+
+          <div class="kpi-grid">
+            <div class="kpi">
+              <span class="kpi-label">WiFi credentials</span>
+              <span class="kpi-value is-success" id="verify-creds">—</span>
+              <span class="kpi-meta">Accepted by device</span>
             </div>
-            <p id="verify-result" style="margin-top: var(--s3); font-weight: 600;"></p>
+            <div class="kpi">
+              <span class="kpi-label">Tracker IP</span>
+              <span class="kpi-value" id="verify-ip">—</span>
+              <span class="kpi-meta">Reported by device</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">SlimeVR server</span>
+              <span class="kpi-value" id="verify-server">Waiting</span>
+              <span class="kpi-meta">Connect in app</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Result</span>
+              <span class="kpi-value" id="verify-result">—</span>
+              <span class="kpi-meta">Live</span>
+            </div>
           </div>
-          <div class="action-area">
-            <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Next Steps</h3>
-            <ul style="list-style: none; font-size: var(--t-base);">
-              <li>1. Open SlimeVR Server</li>
-              <li>2. Wait for tracker to appear</li>
-              <li>3. Complete sensor calibration if prompted</li>
+
+          <div>
+            <span class="section-kicker">Verification feed</span>
+            <div id="verify-log" class="status-log" aria-live="polite">
+              <div class="status-line is-success">WiFi credentials accepted</div>
+              <div class="status-line is-wait">Waiting for tracker handshake…</div>
+            </div>
+          </div>
+
+          <div>
+            <span class="section-kicker">Next steps in SlimeVR Server</span>
+            <ul class="check-list">
+              <li>Open SlimeVR Server</li>
+              <li>Wait for tracker to appear</li>
+              <li>Complete sensor calibration</li>
+              <li>Mount & start tracking</li>
             </ul>
           </div>
-          <button id="btn-reset" class="btn-primary" style="max-width: 200px; background: var(--ink-850);">Start Over</button>
-        </section>
-        <section id="step-4" class="step-content hidden">
-          <h2 class="step-title">Serial Log</h2>
-          <p class="step-instruction">
-            Live stream from your tracker's USB serial port. Useful for debugging boot,
-            WiFi, IMU, or SlimeVR protocol output.
-          </p>
-          <div class="action-area">
-            <div style="display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center;">
-              <button id="btn-log-connect" class="btn-primary" style="max-width: 200px;">Start Streaming</button>
-              <button id="btn-log-clear" class="btn-primary" style="max-width: 140px; background: var(--ink-800); border: 1px solid var(--line); color: var(--text-muted);">Clear</button>
-              <label style="display: flex; gap: var(--s2); align-items: center; font-size: var(--t-sm); color: var(--text-muted);">
-                <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
-              </label>
-              <span id="log-status" class="status-line" style="margin: 0; font-size: var(--t-sm);"></span>
-            </div>
-            <pre id="live-log" style="margin-top: var(--s4); background: var(--ink-950); border: 1px solid var(--line); border-radius: 8px; padding: var(--s3); max-height: 50vh; overflow-y: auto; font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.5; color: var(--paper); white-space: pre-wrap; word-break: break-all;">// Serial log will appear here once streaming starts.
-//</pre>
+
+          <div class="form-actions">
+            <button id="btn-reset" type="button" class="btn btn-secondary">Start over</button>
           </div>
-          <div class="action-area">
-            <h3 style="font-size: var(--t-lg); margin-bottom: var(--s2);">Tips</h3>
-            <ul style="list-style: none; font-size: var(--t-base); color: var(--text-muted);">
-              <li>115200 baud is used to match the firmware default.</li>
-              <li>If the port is already open in another tab, close it first.</li>
-              <li>Re-plug the tracker if you see no output after pressing Start.</li>
+        </section>
+
+        <!-- ============================== STEP 4: SERIAL LOG ============================== -->
+        <section id="step-4" class="step-panel step-content hidden">
+          <header class="step-header">
+            <span class="section-kicker">Step 05 · Serial log</span>
+            <h2 class="step-title">Live diagnostics from the tracker</h2>
+            <p class="step-subtitle">
+              Stream boot, WiFi, IMU and SlimeVR protocol output. Useful for
+              debugging trackers that fail to provision or stay online.
+            </p>
+          </header>
+
+          <div class="form-actions" role="toolbar" aria-label="Serial log controls">
+            <button id="btn-log-connect" type="button" class="btn btn-primary">Start streaming</button>
+            <button id="btn-log-clear" type="button" class="btn btn-secondary">Clear</button>
+            <label class="form-actions" style="display:inline-flex; gap: var(--s2); align-items:center; font-size: var(--t-sm); color: var(--text-muted);">
+              <input type="checkbox" id="log-autoscroll" checked> Auto-scroll
+            </label>
+            <span id="log-status" class="status-line" style="font-size: var(--t-sm);"></span>
+          </div>
+
+          <div class="terminal">
+            <header class="terminal-header">
+              <span><strong>USB Serial</strong> · 115200 baud</span>
+              <div class="terminal-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            </header>
+            <pre id="live-log" class="terminal-body is-empty">Live firmware output appears here once streaming starts.</pre>
+          </div>
+
+          <div>
+            <span class="section-kicker">Tips</span>
+            <ul class="check-list">
+              <li>115200 baud to match firmware default</li>
+              <li>Close the port in other tabs first</li>
+              <li>Re-plug the tracker if no output</li>
+              <li>Use clear to reset the buffer</li>
             </ul>
           </div>
         </section>
       </main>
     </div>
+
     <footer class="footer">
       <div>
-        <strong>Privacy:</strong> All WiFi credentials remain in browser memory and travel only over local USB serial.
+        <strong>Privacy:</strong> WiFi credentials remain in browser memory and travel only over local USB serial.
       </div>
       <div class="footer-links">
-        <a href="https://github.com/juarendra/SlimeVR-BMI160" target="_blank">Source Code</a>
-        <span>|</span>
-        <a href="https://docs.slimevr.dev/" target="_blank">Documentation</a>
-        <span>|</span>
-        <span id="firmware-version">v0.4.0</span>
+        <a href="https://github.com/juarendra/SlimeVR-BMI160" target="_blank" rel="noopener">Source code</a>
+        <span class="footer-divider">|</span>
+        <a href="firmware/">Released firmware</a>
+        <span class="footer-divider">|</span>
+        <a href="manifest.json">Manifest</a>
       </div>
     </footer>
   </div>
-  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

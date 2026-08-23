@@ -205,12 +205,14 @@ def verify_remote_resources(site_dir: Path) -> bool:
     found_remote = []
 
     if index_path.exists():
-        with open(index_path, "r") as f:
+        with open(index_path, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
         script_pattern = re.compile(r'<script[^>]*src=["\']([^"\']+)["\']', re.IGNORECASE)
         for match in script_pattern.finditer(content):
             src = match.group(1)
+            if not src.startswith(("http://", "https://", "//")):
+                continue
             is_allowed = any(domain in src for domain in allowed_domains)
             if not is_allowed:
                 found_remote.append(src)
