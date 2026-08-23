@@ -39,6 +39,7 @@
     </div>
     <div class="main-grid">
       <nav class="step-rail">
+        <div class="rail-title">Workflow</div>
         <div class="step-list">
           <div class="step-item active" data-step="0">
             <span class="step-number">01</span>
@@ -70,6 +71,24 @@
             Click <strong>Connect Serial</strong> above to link your tracker port.
             Use the step rail on the left to navigate.
           </p>
+          <div class="kpi-row">
+            <div class="kpi">
+              <span class="kpi-label">USB</span>
+              <span class="kpi-value" id="kpi-usb">No device</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Port</span>
+              <span class="kpi-value" id="kpi-port">&mdash;</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Firmware</span>
+              <span class="kpi-value" id="kpi-fw">Ready to flash</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Browser</span>
+              <span class="kpi-value" id="kpi-browser">Web Serial</span>
+            </div>
+          </div>
           <details>
             <summary>Troubleshooting</summary>
             <ul class="recovery-list">
@@ -81,24 +100,42 @@
           </details>
         </section>
         <section id="step-1" class="step-content hidden">
-          <h2 class="step-title">Flash Firmware</h2>
-          <p class="step-instruction">
-            This will flash the SlimeVR BMI160 firmware to your tracker over USB.
-            Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation are preserved.
-          </p>
-          <div class="action-area">
-            <esp-web-install-button id="ewt-button" manifest="manifest.json">
-              <button id="btn-flash-firmware" slot="activate" class="btn-primary" style="max-width: 280px; font-size: var(--t-base); padding: 14px 24px;" type="button">
-                &#9889; Flash SlimeVR BMI160 Tracker
-              </button>
-              <span slot="unsupported">Web Serial is unavailable in this browser. Use Chrome or Edge on Windows.</span>
-              <span slot="not-allowed">HTTP not allowed. Open this page over HTTPS.</span>
-            </esp-web-install-button>
+          <div class="hero-cta">
+            <div class="hero-cta-art">
+              <img src="assets/logo_positron.png" alt="SlimeVR Tracker Logo" class="hero-logo" />
+              <div class="hero-chip-row">
+                <span class="hero-chip">ESP32</span>
+                <span class="hero-chip">BMI160 IMU</span>
+                <span class="hero-chip">MPU-6050 Compatible</span>
+              </div>
+            </div>
+            <div class="hero-cta-body">
+              <h2 class="step-title">Flash Firmware</h2>
+              <p class="step-instruction">
+                Flash the SlimeVR BMI160 firmware directly from your browser over USB.
+                Your custom resistor divider (R1=1k, R2=1.82k) and IMU orientation are baked in.
+              </p>
+              <div class="action-area">
+                <esp-web-install-button id="ewt-button" manifest="manifest.json">
+                  <button id="btn-flash-firmware" slot="activate" class="btn-primary btn-hero" type="button">
+                    <span class="btn-icon">&#9889;</span>
+                    <span class="btn-label">
+                      <span class="btn-label-main">Flash Tracker</span>
+                      <span class="btn-label-sub">USB &middot; Web Serial</span>
+                    </span>
+                  </button>
+                  <span slot="unsupported">Web Serial is unavailable in this browser. Use Chrome or Edge on Windows.</span>
+                  <span slot="not-allowed">HTTP not allowed. Open this page over HTTPS.</span>
+                </esp-web-install-button>
+                <a href="firmware/" class="btn-secondary btn-browse">
+                  Browse released firmware &rarr;
+                </a>
+              </div>
+              <p class="step-instruction step-footnote">
+                <strong>Note:</strong> After flashing, the device reboots. Wait for the serial port to reappear before WiFi setup.
+              </p>
+            </div>
           </div>
-          <p class="step-instruction" style="font-size: var(--t-sm);">
-            <strong>Note:</strong> After flashing, the device will reboot. Wait for the serial port to reappear before proceeding to WiFi setup.
-            Don't see a button? <a href="firmware/" style="color: var(--signal);">Browse released firmware versions</a>.
-          </p>
         </section>
         <section id="step-2" class="step-content hidden">
           <h2 class="step-title">WiFi Setup</h2>

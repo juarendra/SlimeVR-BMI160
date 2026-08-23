@@ -55,35 +55,66 @@ function updateSerialStatus(connected, portInfo = '') {
   const btn = document.getElementById('btn-top-serial');
   const led = document.getElementById('top-serial-led');
   const text = document.getElementById('top-serial-text');
-  
+  const kpiUsb = document.getElementById('kpi-usb');
+  const kpiPort = document.getElementById('kpi-port');
+
   if (connected) {
     btn?.classList.add('connected');
     if (led) led.style.background = 'var(--success)';
     if (text) text.textContent = portInfo ? `Serial: Connected (${portInfo})` : 'Serial: Connected';
+    if (kpiUsb) { kpiUsb.textContent = 'Connected'; kpiUsb.style.color = 'var(--success)'; }
+    if (kpiPort) { kpiPort.textContent = portInfo || 'COM active'; kpiPort.style.color = 'var(--success)'; }
   } else {
     btn?.classList.remove('connected');
     if (led) led.style.background = 'var(--danger)';
     if (text) text.textContent = 'Connect Serial (Disconnected)';
+    if (kpiUsb) { kpiUsb.textContent = 'No device'; kpiUsb.style.color = ''; }
+    if (kpiPort) { kpiPort.textContent = '—'; kpiPort.style.color = ''; }
   }
 }
 
 function updateFirmwareStatus(flashed) {
   const dot = document.getElementById('top-firmware-dot');
   const text = document.getElementById('top-firmware-text');
-  
+  const kpiFw = document.getElementById('kpi-fw');
+
   if (flashed) {
     if (dot) dot.style.background = 'var(--success)';
     if (text) {
       text.textContent = 'Flashed (Ready)';
       text.style.color = 'var(--success)';
     }
+    if (kpiFw) { kpiFw.textContent = 'Flashed'; kpiFw.style.color = 'var(--success)'; }
   } else {
     if (dot) dot.style.background = 'var(--warning)';
     if (text) {
       text.textContent = 'Not Verified';
       text.style.color = 'var(--warning)';
     }
+    if (kpiFw) { kpiFw.textContent = 'Ready to flash'; kpiFw.style.color = ''; }
   }
+}
+
+function initBrowserKpi() {
+  const kpiBrowser = document.getElementById('kpi-browser');
+  const supported = 'serial' in navigator;
+  if (!kpiBrowser) return;
+  if (supported) {
+    kpiBrowser.textContent = getBrowserName();
+    kpiBrowser.style.color = 'var(--success)';
+  } else {
+    kpiBrowser.textContent = 'Not supported';
+    kpiBrowser.style.color = 'var(--danger)';
+  }
+}
+
+function getBrowserName() {
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return 'Edge';
+  if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) return 'Chrome';
+  if (/Firefox\//.test(ua)) return 'Firefox';
+  if (/Safari\//.test(ua)) return 'Safari';
+  return 'Web Serial OK';
 }
 
 async function ensureSerialPort() {
@@ -438,10 +469,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupPasswordToggle();
   setupResetButton();
-  
+  initBrowserKpi();
+
   document.getElementById('btn-top-serial')?.addEventListener('click', handleSerialConnect);
   document.getElementById('btn-connect-wifi')?.addEventListener('click', handleWifiConnect);
   setupRetryButton();
-  
+
   renderState();
 });
