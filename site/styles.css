@@ -616,15 +616,23 @@ body::before {
   pointer-events: none;
 }
 .flash-art {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: var(--s6);
   background: var(--surface-0);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   position: relative;
+  max-width: 160px;
+  width: 100%;
 }
-.flash-art img { max-width: 160px; height: auto; }
+.flash-art img {
+  max-width: 100%;
+  height: auto;
+  width: 100%;
+  object-fit: contain;
+}
 .flash-art-glow {
   position: absolute;
   inset: -20%;
@@ -638,6 +646,7 @@ body::before {
   gap: var(--s2);
   margin-top: var(--s4);
   justify-content: center;
+  max-width: 100%;
 }
 .chip {
   display: inline-flex;
