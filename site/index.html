@@ -249,9 +249,17 @@
                 <span class="form-help" id="wifi-help">8–63 characters · WPA / WPA2</span>
               </div>
             </div>
+            <div id="wifi-phase" class="wifi-phase is-idle hidden" role="status" aria-live="polite">
+              <span class="wifi-phase-dot" id="wifi-phase-dot" aria-hidden="true"></span>
+              <span class="wifi-phase-text" id="wifi-phase-text"></span>
+            </div>
             <div class="form-actions">
-              <button id="btn-connect-wifi" type="button" class="btn btn-primary">Save & connect WiFi</button>
+              <button id="btn-connect-wifi" type="button" class="btn btn-primary">
+                <span class="btn-loader" aria-hidden="true"></span>
+                <span class="btn-label">Save &amp; connect WiFi</span>
+              </button>
               <button id="btn-retry-wifi" type="button" class="btn btn-secondary hidden">Retry</button>
+              <button id="btn-reset-wifi" type="button" class="btn btn-ghost hidden">Reconfigure</button>
             </div>
           </div>
 

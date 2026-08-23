@@ -742,6 +742,56 @@ body::before {
 .form-help.is-success { color: var(--success); }
 .form-actions { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; }
 
+/* ---------- WiFi phase banner (idle/connecting/success/error) ----------- */
+.wifi-phase {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  margin: var(--s4) 0 0 0;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface-inset);
+  font-size: var(--t-sm);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+}
+.wifi-phase.hidden { display: none; }
+.wifi-phase-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-full);
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+.wifi-phase-text { color: var(--text-body); }
+.wifi-phase.is-connecting { border-color: var(--brand-red); background: rgba(224, 82, 69, 0.08); }
+.wifi-phase.is-connecting .wifi-phase-dot {
+  background: var(--brand-red);
+  animation: pulse 1.2s var(--ease) infinite;
+  box-shadow: 0 0 0 4px rgba(224, 82, 69, 0.15);
+}
+.wifi-phase.is-success { border-color: var(--success); background: rgba(95, 207, 126, 0.10); }
+.wifi-phase.is-success .wifi-phase-dot { background: var(--success); }
+.wifi-phase.is-success .wifi-phase-text { color: var(--success); font-weight: 600; }
+.wifi-phase.is-error { border-color: var(--danger); background: rgba(224, 82, 69, 0.12); }
+.wifi-phase.is-error .wifi-phase-dot { background: var(--danger); }
+.wifi-phase.is-error .wifi-phase-text { color: var(--danger); font-weight: 600; }
+
+/* ---------- Button loader spinner --------------------------------------- */
+.btn-loader {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-full);
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+  margin-right: var(--s2);
+}
+.btn[disabled] .btn-loader { display: inline-block; }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
 /* ---------- Status log (verify/wifi feedback) --------------------------- */
 .status-log {
   display: flex;

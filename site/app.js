@@ -295,12 +295,78 @@ function validateWifiCredentials(ssid, password) {
 function logToWifiLog(message, type = 'info') {
   const wifiLog = document.getElementById('wifi-status');
   if (!wifiLog) return;
-  
+
   const line = document.createElement('div');
   line.className = `status-line ${type}`;
   line.textContent = message;
   wifiLog.appendChild(line);
   wifiLog.scrollTop = wifiLog.scrollHeight;
+}
+
+const WIFI_PHASE_IDLE = 'idle';
+const WIFI_PHASE_CONNECTING = 'connecting';
+const WIFI_PHASE_HANDSHAKE = 'handshake';
+const WIFI_PHASE_SENDING = 'sending';
+const WIFI_PHASE_SUCCESS = 'success';
+const WIFI_PHASE_FAILED = 'failed';
+
+function setWifiPhase(phase, label) {
+  const banner = document.getElementById('wifi-phase');
+  const btnConnect = document.getElementById('btn-connect-wifi');
+  const btnRetry = document.getElementById('btn-retry-wifi');
+  const btnReset = document.getElementById('btn-reset-wifi');
+  const dot = document.getElementById('wifi-phase-dot');
+  const text = document.getElementById('wifi-phase-text');
+
+  if (!banner || !btnConnect || !btnRetry || !text) return;
+
+  banner.classList.remove(
+    'is-idle', 'is-connecting', 'is-success', 'is-error',
+  );
+  if (phase === WIFI_PHASE_IDLE) {
+    banner.classList.add('is-idle', 'hidden');
+    btnConnect.classList.remove('hidden');
+    btnConnect.disabled = false;
+    btnConnect.querySelector('.btn-label')?.replaceChildren(
+      document.createTextNode('Save & connect WiFi'),
+    );
+    btnRetry.classList.add('hidden');
+    btnReset?.classList.add('hidden');
+    return;
+  }
+
+  banner.classList.remove('hidden');
+  banner.classList.add(phase === WIFI_PHASE_SUCCESS
+    ? 'is-success'
+    : phase === WIFI_PHASE_FAILED ? 'is-error' : 'is-connecting');
+
+  text.textContent = label;
+
+  if (phase === WIFI_PHASE_SUCCESS) {
+    btnConnect.classList.add('hidden');
+    btnRetry.classList.add('hidden');
+    btnReset?.classList.remove('hidden');
+    return;
+  }
+
+  if (phase === WIFI_PHASE_FAILED) {
+    btnConnect.classList.remove('hidden');
+    btnConnect.disabled = false;
+    btnConnect.querySelector('.btn-label')?.replaceChildren(
+      document.createTextNode('Try again'),
+    );
+    btnRetry.classList.add('hidden');
+    btnReset?.classList.remove('hidden');
+    return;
+  }
+
+  btnConnect.classList.remove('hidden');
+  btnConnect.disabled = true;
+  btnConnect.querySelector('.btn-label')?.replaceChildren(
+    document.createTextNode(label || 'Processing…'),
+  );
+  btnRetry.classList.add('hidden');
+  btnReset?.classList.add('hidden');
 }
 
 function showUnsupportedBrowser() {
@@ -397,92 +463,99 @@ function setupPasswordToggle() {
 async function handleWifiConnect() {
   const ssid = document.getElementById('wifi-ssid').value.trim();
   const password = document.getElementById('wifi-password').value;
-  
+
   const validation = validateWifiCredentials(ssid, password);
   if (!validation.valid) {
     logToWifiLog(`Validation error: ${validation.error}`, 'error');
+    setWifiPhase(WIFI_PHASE_FAILED, validation.error);
     return;
   }
-  
+
   currentState = STATE.SERIAL_CONNECTING;
   renderState();
-  
-  const btnConnectWifi = document.getElementById('btn-connect-wifi');
-  const btnRetryWifi = document.getElementById('btn-retry-wifi');
-  
-  if (btnConnectWifi) btnConnectWifi.classList.add('hidden');
-  if (btnRetryWifi) btnRetryWifi.classList.remove('hidden');
-  
+  setWifiPhase(WIFI_PHASE_CONNECTING, 'Opening serial port…');
+
   let currentPort = null;
-  
+
   try {
     if (!('serial' in navigator)) {
       showUnsupportedBrowser();
+      setWifiPhase(WIFI_PHASE_FAILED, 'Web Serial not supported in this browser');
       return;
     }
-    
+
     logToWifiLog('Connecting to device serial port...', 'info');
+    setWifiPhase(WIFI_PHASE_HANDSHAKE, 'Handshaking with device…');
     currentPort = await ensureSerialPort();
-    
+
     logToWifiLog('Identity handshake successful.', 'success');
-    
+
     currentState = STATE.SENDING_CREDENTIALS;
     renderState();
+    setWifiPhase(WIFI_PHASE_SENDING, `Sending credentials to "${ssid}"…`);
     logToWifiLog('Sending WiFi credentials...', 'info');
-    
+
     const result = await sendWiFiCredentials(ssid, password);
-    
+
     if (result.success) {
       currentState = STATE.CONNECTED;
       renderState();
+      setWifiPhase(
+        WIFI_PHASE_SUCCESS,
+        `Connected to "${ssid}"${result.ip ? ` · IP ${result.ip}` : ''}`,
+      );
       logToWifiLog(`WiFi connected! IP: ${result.ip || 'N/A'}`, 'success');
-      
+
       const verifyResult = document.getElementById('verify-result');
       if (verifyResult) {
         verifyResult.textContent = `Connected to ${ssid}`;
         verifyResult.style.color = 'var(--success)';
       }
-      
+
       await clearCredentialsFromMemory();
     } else {
       currentState = STATE.PROVISION_FAILED;
       renderState();
+      setWifiPhase(WIFI_PHASE_FAILED, `Failed: ${result.error}`);
       logToWifiLog(`WiFi connection failed: ${result.error}`, 'error');
-      
+
       const verifyResult = document.getElementById('verify-result');
       if (verifyResult) {
         verifyResult.textContent = `WiFi connection failed (${result.error})`;
         verifyResult.style.color = 'var(--danger)';
       }
-      
+
       await clearCredentialsFromMemory();
     }
   } catch (error) {
     logToWifiLog(`Error: ${error.message}`, 'error');
     updateSerialStatus(false);
-    
+    setWifiPhase(WIFI_PHASE_FAILED, `Error: ${error.message}`);
+
     if (currentState !== STATE.PROVISION_FAILED && currentState !== STATE.CONNECTED) {
       currentState = STATE.PROVISION_FAILED;
       renderState();
     }
-    
+
     await clearCredentialsFromMemory();
   }
 }
 
+function resetWifiForm() {
+  document.getElementById('wifi-password').value = '';
+  setWifiPhase(WIFI_PHASE_IDLE, '');
+  logToWifiLog('Form reset. Ready for new credentials.', 'info');
+}
+
 function setupRetryButton() {
   const btnRetryWifi = document.getElementById('btn-retry-wifi');
-  
   if (btnRetryWifi) {
-    btnRetryWifi.addEventListener('click', async () => {
-      document.getElementById('wifi-password').value = '';
-      
-      const btnConnectWifi = document.getElementById('btn-connect-wifi');
-      if (btnConnectWifi) btnConnectWifi.classList.remove('hidden');
-      if (btnRetryWifi) btnRetryWifi.classList.add('hidden');
-      
-      logToWifiLog('Ready to retry', 'info');
-    });
+    btnRetryWifi.addEventListener('click', resetWifiForm);
+  }
+
+  const btnResetWifi = document.getElementById('btn-reset-wifi');
+  if (btnResetWifi) {
+    btnResetWifi.addEventListener('click', resetWifiForm);
   }
 }
 
