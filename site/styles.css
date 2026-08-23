@@ -44,7 +44,7 @@ body {
   background: var(--bg-dark);
   background-image: 
     linear-gradient(rgba(18, 20, 22, 0.85), rgba(18, 20, 22, 0.85)),
-    url('../assets/positron.jpg');
+    url('./assets/positron.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

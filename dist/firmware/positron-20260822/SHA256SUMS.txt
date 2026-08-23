@@ -1,1 +1,0 @@
-83eac70c82809be9c96cf02def6f1e6b6c1048554b69f6077ef70fa195b5f692  slimevr-bmi160-esp32-full.bin
