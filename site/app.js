@@ -460,6 +460,113 @@ function setupPasswordToggle() {
   }
 }
 
+let serialStreamReader = null;
+let serialStreamActive = false;
+
+function setupSerialLog() {
+  const btnLogConnect = document.getElementById('btn-log-connect');
+  const btnLogClear = document.getElementById('btn-log-clear');
+  const logAutoscroll = document.getElementById('log-autoscroll');
+  const logStatus = document.getElementById('log-status');
+  const liveLog = document.getElementById('live-log');
+
+  if (!btnLogConnect || !btnLogClear || !liveLog) return;
+
+  btnLogConnect.addEventListener('click', async () => {
+    if (serialStreamActive) {
+      stopSerialLog();
+      return;
+    }
+    await startSerialLog();
+  });
+
+  btnLogClear.addEventListener('click', () => {
+    if (liveLog) liveLog.textContent = '';
+  });
+
+  if (logAutoscroll) {
+    logAutoscroll.addEventListener('change', (e) => {
+      if (liveLog) {
+        liveLog.style.overflowY = e.target.checked ? 'auto' : 'hidden';
+      }
+    });
+  }
+
+  function updateLogStatus(message, type = 'info') {
+    if (logStatus) {
+      logStatus.textContent = message;
+      logStatus.className = `status-line ${type}`;
+    }
+  }
+
+  async function startSerialLog() {
+    if (!('serial' in navigator)) {
+      updateLogStatus('Web Serial not supported', 'is-error');
+      return;
+    }
+
+    try {
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+
+      updateLogStatus('Streaming started', 'is-success');
+
+      const decoder = new TextDecoderStream();
+      const readableStreamClosed = port.readable.pipeTo(decoder.writable);
+      const reader = decoder.readable.getReader();
+
+      serialStreamReader = reader;
+      serialStreamActive = true;
+      btnLogConnect.textContent = 'Stop streaming';
+      btnLogConnect.classList.replace('btn-primary', 'btn-secondary');
+
+      if (liveLog) liveLog.classList.remove('is-empty');
+
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+
+        if (done) {
+          reader.releaseLock();
+          break;
+        }
+
+        buffer += value;
+
+        while (buffer.includes('\n')) {
+          const lineEnd = buffer.indexOf('\n');
+          const line = buffer.slice(0, lineEnd + 1);
+          buffer = buffer.slice(lineEnd + 1);
+
+          if (liveLog) {
+            liveLog.textContent += line;
+            if (logAutoscroll && logAutoscroll.checked) {
+              liveLog.scrollTop = liveLog.scrollHeight;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      updateLogStatus(`Error: ${error.message}`, 'is-error');
+    }
+  }
+
+  function stopSerialLog() {
+    if (serialStreamReader) {
+      serialStreamReader.cancel();
+      serialStreamReader.releaseLock();
+      serialStreamReader = null;
+    }
+    serialStreamActive = false;
+    if (btnLogConnect) {
+      btnLogConnect.textContent = 'Start streaming';
+      btnLogConnect.classList.replace('btn-secondary', 'btn-primary');
+    }
+    updateLogStatus('Stopped', 'is-info');
+  }
+}
+
 async function handleWifiConnect() {
   const ssid = document.getElementById('wifi-ssid').value.trim();
   const password = document.getElementById('wifi-password').value;
@@ -576,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupNavigation();
   setupPasswordToggle();
+  setupSerialLog();
   setupResetButton();
   initBrowserKpi();
 
