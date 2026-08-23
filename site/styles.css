@@ -630,9 +630,7 @@ body::before {
 .flash-art img {
   max-width: 100%;
   height: auto;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
+  width: auto;
 }
 .flash-art-glow {
   position: absolute;
