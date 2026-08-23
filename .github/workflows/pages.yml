@@ -117,7 +117,7 @@ jobs:
 
       - name: Validate HTML
         run: |
-          python -c "import sys; sys.exit(0 if open('dist/index.html', encoding='utf-8').read().count('<img class=\"brand-logo\"') == 1 else 1)"
+          python -c "import sys; html=open('dist/index.html', encoding='utf-8').read(); sys.exit(0 if html.count('class=\"brand-logo\"') == 1 else 1)"
 
       - name: Smoke check dist served as HTTP 200
         run: |
