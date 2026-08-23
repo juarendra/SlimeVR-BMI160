@@ -115,9 +115,8 @@ jobs:
       - name: Run verify_release.py
         run: python scripts/verify_release.py --dist-dir dist
 
-      - name: Validate HTML
-        run: |
-          python -c "import sys; html=open('dist/index.html', encoding='utf-8').read(); sys.exit(0 if html.count('class=\"brand-logo\"') == 1 else 1)"
+      - name: Validate HTML structure
+        run: python scripts/html_smoke.py --path dist/index.html
 
       - name: Smoke check dist served as HTTP 200
         run: |
@@ -125,7 +124,7 @@ jobs:
           SRV_PID=$!
           sleep 1
           trap "kill $SRV_PID" EXIT
-          for path in / /index.html /manifest.json /assets/positron.jpg /assets/logo_positron.png; do
+          for path in / /index.html /app.js /styles.css /manifest.json /assets/positron.jpg /assets/logo_positron.png; do
             CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8765$path")
             if [ "$CODE" != "200" ]; then
               echo "Asset not 200: $path -> $CODE"
