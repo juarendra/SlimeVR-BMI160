@@ -13,13 +13,13 @@ Tracker SlimeVR-BMI160 adalah perangkat full-body tracking DIY berbasis ESP32 da
 
 ### Langkah 1: Buka Halaman Web Installer
 
-<img src="screenshots/step1-homepage.png" alt="Halaman utama Web Installer" width="700">
+<img src="screenshots/step0-inspect.png" alt="Halaman utama Web Installer" width="700">
 
 Buka [SlimeVR BMI160 Web Installer](https://juarendra.github.io/SlimeVR-BMI160/) di Chrome/Edge.
 
 ### Langkah 2: Hubungkan Tracker & Connect
 
-<img src="screenshots/step2-connect.png" alt="Tombol Connect" width="700">
+<img src="screenshots/step0-inspect.png" alt="Tombol Connect" width="700">
 
 1. Colokkan tracker via USB (pastikan kabel data).
 2. Klik tombol **Connect** (pojok kiri atas).
@@ -27,7 +27,7 @@ Buka [SlimeVR BMI160 Web Installer](https://juarendra.github.io/SlimeVR-BMI160/)
 
 ### Langkah 3: Verifikasi Koneksi
 
-<img src="screenshots/step3-verified.png" alt="Status terhubung" width="700">
+<img src="screenshots/step0-inspect.png" alt="Status terhubung" width="700">
 
 Jika berhasil:
 - Status "Serial connected" berwarna hijau.
@@ -35,7 +35,7 @@ Jika berhasil:
 
 ### Langkah 4: Flash Firmware
 
-<img src="screenshots/step4-flash.png" alt="Tombol Flash Tracker" width="700">
+<img src="screenshots/step1-flash.png" alt="Tombol Flash Tracker" width="700">
 
 1. Pindah ke step 2 (klik "02 Flash firmware" di sidebar).
 2. Klik tombol **Flash Tracker**.
@@ -45,7 +45,7 @@ Jika berhasil:
 
 ### Langkah 5: Konfigurasi WiFi
 
-<img src="screenshots/step5-wifi.png" alt="Form WiFi" width="700">
+<img src="screenshots/step2-wifi.png" alt="Form WiFi" width="700">
 
 1. Pindah ke step 3.
 2. Masukkan **SSID** dan **Password** WiFi Anda.
@@ -54,14 +54,14 @@ Jika berhasil:
 
 ### Langkah 6: Verifikasi di SlimeVR Server
 
-<img src="screenshots/step6-server.png" alt="Tracker muncul di server" width="700">
+<img src="screenshots/step3-verify.png" alt="Tracker muncul di server" width="700">
 
 - Buka SlimeVR Server di PC.
 - Tracker akan muncul otomatis (pastikan satu jaringan).
 
 ### Langkah 7: Serial Log (Debugging)
 
-<img src="screenshots/step7-serial.png" alt="Serial log" width="700">
+<img src="screenshots/step4-serial.png" alt="Serial log" width="700">
 
 Gunakan step 5 untuk melihat output real-time dari tracker (boot, WiFi, IMU).
 
