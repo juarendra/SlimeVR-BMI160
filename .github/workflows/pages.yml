@@ -54,11 +54,16 @@ jobs:
         working-directory: FIRMWARE/SlimeVR-Tracker-ESP
         run: pio run -e esp32
 
+      - name: Stage firmware build
+        run: |
+          mkdir -p build-output
+          cp -r FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32 build-output/esp32
+
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-build-${{ steps.version.outputs.short-sha }}
-          path: FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/*.bin
+          path: build-output
           if-no-files-found: error
 
   site-test:
@@ -78,7 +83,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: firmware-build-${{ needs.firmware.outputs.short-sha }}
-          path: build-output/esp32
+          path: build-output/.pio/build/esp32
 
       - name: Resolve release id
         id: version
