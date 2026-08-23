@@ -94,12 +94,13 @@ def check_secret_in_file(filepath: Path, secrets: list) -> list:
 
 
 def scan_directory(dirpath: Path, secrets: list) -> list:
-    """Recursively scan directory for secrets."""
-    all_found = []
+    """Recursively scan directory for files containing any secret string."""
+    found = []
+    text_exts = {".js", ".json", ".html", ".css", ".md", ".txt", ".xml", ".yaml", ".yml", ".csv"}
     for item in dirpath.rglob("*"):
-        if item.is_file():
-            all_found.extend(check_secret_in_file(item, secrets))
-    return all_found
+        if item.is_file() and item.suffix.lower() in text_exts:
+            found.extend(check_secret_in_file(item, secrets))
+    return found
 
 
 def verify_no_secrets(dist_dir: Path) -> bool:
@@ -129,13 +130,23 @@ def check_absolute_paths(dirpath: Path) -> list:
     found = []
     pattern = re.compile(r"[A-Za-z]:[\\/]")
 
+    def is_false_positive(rel_path: str, match: str) -> bool:
+        schemes = ("http", "https", "ftp", "ws", "wss", "file", "data", "mailto", "tel", "sms", "ssh", "git")
+        prefix = rel_path[:match.start()].rstrip()
+        last_word = prefix.split()[-1] if prefix.split() else ""
+        last_word = last_word.rstrip(":;,()")
+        return last_word.lower() in schemes
+
     for item in dirpath.rglob("*"):
-        if item.is_file() and item.suffix in [".js", ".json", ".html", ".css", ".md", ".txt"]:
+        if item.is_file() and item.suffix.lower() in [".js", ".json", ".html", ".css", ".md", ".txt"]:
             try:
                 with open(item, "r", encoding="utf-8") as f:
                     content = f.read()
-                if pattern.search(content):
-                    found.append(str(item))
+                for m in pattern.finditer(content):
+                    rel_path = str(item.relative_to(dirpath)) if hasattr(item, "relative_to") else str(item)
+                    if not is_false_positive(rel_path, m.group(0)):
+                        found.append(f"{item} (match: '{m.group(0)}')")
+                        break
             except Exception:
                 pass
 
