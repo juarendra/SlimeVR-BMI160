@@ -1,0 +1,12 @@
+{
+  "name": "slimevr-bmi160",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "qa:baseline": "node scripts/visual-qa/baseline.mjs",
+    "qa:fast": "node scripts/visual-qa/baseline.mjs --viewport=desktop-1440"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

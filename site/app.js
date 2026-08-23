@@ -17,17 +17,14 @@ let activeReader = null;
 let currentState = STATE.READY_TO_FLASH;
 
 function renderState() {
-  const items = document.querySelectorAll('.step-item');
-  const contents = document.querySelectorAll('.step-content');
-  let targetStep = 1;
-  
+  let targetStep = 0;
+
   switch (currentState) {
     case STATE.UNSUPPORTED_BROWSER:
-      targetStep = 0;
-      break;
     case STATE.READY_TO_FLASH:
     case STATE.FLASHING:
     case STATE.FLASH_COMPLETE:
+    case STATE.DEVICE_DISCONNECTED:
       targetStep = 1;
       break;
     case STATE.READY_TO_PROVISION:
@@ -35,76 +32,105 @@ function renderState() {
     case STATE.SENDING_CREDENTIALS:
     case STATE.WAITING_FOR_WIFI:
     case STATE.PROVISION_FAILED:
-    case STATE.DEVICE_DISCONNECTED:
       targetStep = 2;
       break;
     case STATE.CONNECTED:
       targetStep = 3;
       break;
   }
-  
-  items.forEach((item, idx) => {
-    item.classList.toggle('active', idx === targetStep);
-  });
-  contents.forEach((content, idx) => {
-    content.classList.toggle('hidden', idx !== targetStep);
-  });
+
+  goToStep(targetStep);
+}
+
+function setStatusDotClass(el, klass) {
+  if (!el) return;
+  el.classList.remove('is-ok', 'is-warn', 'is-error', 'is-info');
+  if (klass) el.classList.add(klass);
+}
+
+function setTileClass(el, klass) {
+  if (!el) return;
+  el.classList.remove('is-highlight', 'is-warning', 'is-ok');
+  if (klass) el.classList.add(klass);
+}
+
+function setKpiState(el, value, variant) {
+  if (!el) return;
+  el.textContent = value;
+  el.classList.remove('is-success', 'is-warn', 'is-danger');
+  if (variant) el.classList.add(variant);
 }
 
 function updateSerialStatus(connected, portInfo = '') {
   const btn = document.getElementById('btn-top-serial');
   const led = document.getElementById('top-serial-led');
   const text = document.getElementById('top-serial-text');
+  const tile = document.getElementById('tile-serial');
   const kpiUsb = document.getElementById('kpi-usb');
   const kpiPort = document.getElementById('kpi-port');
+  const deviceArt = document.getElementById('device-art');
+  const deviceTitle = document.getElementById('device-status-title');
+  const deviceSub = document.getElementById('device-status-sub');
 
   if (connected) {
-    btn?.classList.add('connected');
-    if (led) led.style.background = 'var(--success)';
-    if (text) text.textContent = portInfo ? `Serial: Connected (${portInfo})` : 'Serial: Connected';
-    if (kpiUsb) { kpiUsb.textContent = 'Connected'; kpiUsb.style.color = 'var(--success)'; }
-    if (kpiPort) { kpiPort.textContent = portInfo || 'COM active'; kpiPort.style.color = 'var(--success)'; }
+    btn?.classList.add('is-active');
+    if (btn) btn.textContent = 'Disconnect';
+    setStatusDotClass(led, 'is-ok');
+    setTileClass(tile, 'is-ok');
+    if (text) text.textContent = portInfo ? `Connected · ${portInfo}` : 'Serial connected';
+    setKpiState(kpiUsb, 'Connected', 'is-success');
+    setKpiState(kpiPort, portInfo || 'COM active', 'is-success');
+    if (deviceArt) deviceArt.classList.remove('is-disconnected');
+    if (deviceTitle) deviceTitle.textContent = 'Tracker detected';
+    if (deviceSub) deviceSub.textContent = 'Identity handshake complete. Continue to step 02 to flash firmware.';
   } else {
-    btn?.classList.remove('connected');
-    if (led) led.style.background = 'var(--danger)';
-    if (text) text.textContent = 'Connect Serial (Disconnected)';
-    if (kpiUsb) { kpiUsb.textContent = 'No device'; kpiUsb.style.color = ''; }
-    if (kpiPort) { kpiPort.textContent = '—'; kpiPort.style.color = ''; }
+    btn?.classList.remove('is-active');
+    if (btn) btn.textContent = 'Connect';
+    setStatusDotClass(led, 'is-error');
+    setTileClass(tile, null);
+    if (text) text.textContent = 'Serial disconnected';
+    setKpiState(kpiUsb, 'No device');
+    setKpiState(kpiPort, '—');
+    if (deviceArt) deviceArt.classList.add('is-disconnected');
+    if (deviceTitle) deviceTitle.textContent = 'No device detected';
+    if (deviceSub) deviceSub.textContent = 'Plug in the tracker, then choose the serial port from the browser prompt.';
   }
 }
 
 function updateFirmwareStatus(flashed) {
   const dot = document.getElementById('top-firmware-dot');
   const text = document.getElementById('top-firmware-text');
+  const tile = document.getElementById('tile-firmware');
   const kpiFw = document.getElementById('kpi-fw');
 
   if (flashed) {
-    if (dot) dot.style.background = 'var(--success)';
-    if (text) {
-      text.textContent = 'Flashed (Ready)';
-      text.style.color = 'var(--success)';
-    }
-    if (kpiFw) { kpiFw.textContent = 'Flashed'; kpiFw.style.color = 'var(--success)'; }
+    setStatusDotClass(dot, 'is-ok');
+    setTileClass(tile, 'is-ok');
+    if (text) text.textContent = 'Firmware verified';
+    setKpiState(kpiFw, 'Flashed', 'is-success');
   } else {
-    if (dot) dot.style.background = 'var(--warning)';
-    if (text) {
-      text.textContent = 'Not Verified';
-      text.style.color = 'var(--warning)';
-    }
-    if (kpiFw) { kpiFw.textContent = 'Ready to flash'; kpiFw.style.color = ''; }
+    setStatusDotClass(dot, 'is-warn');
+    setTileClass(tile, 'is-warning');
+    if (text) text.textContent = 'Firmware not verified';
+    setKpiState(kpiFw, 'Ready to flash', 'is-warn');
   }
 }
 
 function initBrowserKpi() {
   const kpiBrowser = document.getElementById('kpi-browser');
+  const kpiBrowserTitle = document.getElementById('kpi-browser-title');
+  const tile = document.getElementById('tile-browser');
   const supported = 'serial' in navigator;
   if (!kpiBrowser) return;
   if (supported) {
     kpiBrowser.textContent = getBrowserName();
-    kpiBrowser.style.color = 'var(--success)';
+    setStatusDotClass(tile?.querySelector('.status-dot'), 'is-ok');
+    if (tile) tile.classList.remove('is-warning');
   } else {
     kpiBrowser.textContent = 'Not supported';
-    kpiBrowser.style.color = 'var(--danger)';
+    setStatusDotClass(tile?.querySelector('.status-dot'), 'is-error');
+    if (tile) { tile.classList.remove('is-ok'); tile.classList.add('is-warning'); }
+    if (kpiBrowserTitle) kpiBrowserTitle.textContent = 'Browser unsupported';
   }
 }
 
@@ -329,19 +355,28 @@ async function handleSerialConnect() {
   }
 }
 
+function goToStep(idx) {
+  const targetContents = Array.from(document.querySelectorAll('.step-content'));
+  const targetIdx = Math.max(0, Math.min(idx, targetContents.length - 1));
+  document.querySelectorAll('.step-item').forEach((it, j) => {
+    it.classList.toggle('is-active', j === targetIdx);
+    it.classList.toggle('is-complete', j < targetIdx);
+  });
+  targetContents.forEach((content, j) => {
+    content.classList.toggle('hidden', j !== targetIdx);
+  });
+  const liveLog = document.getElementById('live-log');
+  if (liveLog) liveLog.classList.toggle('is-empty', liveLog.textContent.trim() === '');
+  if (history.replaceState) history.replaceState(null, '', '#step-' + targetIdx);
+}
+
 function setupNavigation() {
-  document.querySelectorAll('.step-item').forEach((item) => {
-    item.addEventListener('click', () => {
-      const step = parseInt(item.getAttribute('data-step'), 10);
-      const items = document.querySelectorAll('.step-item');
-      const contents = document.querySelectorAll('.step-content');
-      
-      items.forEach((item, idx) => {
-        item.classList.toggle('active', idx === step);
-      });
-      contents.forEach((content, idx) => {
-        content.classList.toggle('hidden', idx !== step);
-      });
+  document.querySelectorAll('.step-item').forEach((item, idx) => {
+    item.addEventListener('click', () => goToStep(idx));
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToStep(idx); }
     });
   });
 }
@@ -465,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!('serial' in navigator) || !window.isSecureContext) {
     showUnsupportedBrowser();
   }
-  
+
   setupNavigation();
   setupPasswordToggle();
   setupResetButton();
@@ -475,5 +510,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-connect-wifi')?.addEventListener('click', handleWifiConnect);
   setupRetryButton();
 
-  renderState();
+  if (window.location.hash) {
+    const m = window.location.hash.match(/^#step-(\d)$/);
+    if (m) goToStep(parseInt(m[1], 10));
+    else goToStep(0);
+  } else {
+    goToStep(0);
+  }
 });
