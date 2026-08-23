@@ -628,9 +628,10 @@ body::before {
   flex: 1;
 }
 .flash-art img {
-  max-width: 100%;
+  max-width: 140px;
   height: auto;
   width: auto;
+  margin-top: var(--s3);
 }
 .flash-art-glow {
   position: absolute;
