@@ -55,15 +55,16 @@ jobs:
         run: pio run -e esp32
 
       - name: Stage firmware build
+        working-directory: FIRMWARE/SlimeVR-Tracker-ESP
         run: |
           mkdir -p .pio-staging
-          cp -r FIRMWARE/SlimeVR-Tracker-ESP/.pio/build/esp32/. .pio-staging/
+          cp -r .pio/build/esp32/. .pio-staging/
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-build-${{ steps.version.outputs.short-sha }}
-          path: .pio-staging
+          path: FIRMWARE/SlimeVR-Tracker-ESP/.pio-staging
           if-no-files-found: error
 
   site-test:
