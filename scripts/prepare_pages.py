@@ -17,27 +17,27 @@ def get_platformio_metadata(build_dir: Path) -> dict:
     """Extract flash parameters and binary paths from PlatformIO build metadata."""
     metadata_path = build_dir / ".pio" / "build" / "esp32" / "idedata.json"
 
-    if not metadata_path.exists():
-        raise FileNotFoundError(f"idedata.json not found: {metadata_path}")
-
-    with open(metadata_path, "r") as f:
-        data = json.load(f)
-
-    upload_flags = data.get("upload_flags", [])
     flash_mode = "dio"
     flash_freq = "40m"
     flash_size = "4MB"
 
-    for flag in upload_flags:
-        if flag == "-fm":
-            idx = upload_flags.index(flag)
-            flash_mode = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "dio"
-        elif flag == "-ff":
-            idx = upload_flags.index(flag)
-            flash_freq = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "40m"
-        elif flag == "-fs":
-            idx = upload_flags.index(flag)
-            flash_size = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "4MB"
+    if metadata_path.exists():
+        with open(metadata_path, "r") as f:
+            data = json.load(f)
+
+        upload_flags = data.get("upload_flags", [])
+        for flag in upload_flags:
+            if flag == "-fm":
+                idx = upload_flags.index(flag)
+                flash_mode = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "dio"
+            elif flag == "-ff":
+                idx = upload_flags.index(flag)
+                flash_freq = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "40m"
+            elif flag == "-fs":
+                idx = upload_flags.index(flag)
+                flash_size = upload_flags[idx + 1] if idx + 1 < len(upload_flags) else "4MB"
+    else:
+        print(f"Warning: {metadata_path} not found; using default flash params (dio/40m/4MB).")
 
     build_dir_esp32 = build_dir / ".pio" / "build" / "esp32"
     bootloader = build_dir_esp32 / "bootloader.bin"
