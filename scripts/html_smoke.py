@@ -22,7 +22,7 @@ SENTINELS: dict[str, int] = {
     "rail": 1,
     "kpi-grid": 2,
     "flash-hero": 1,
-    "step-panel": 5,
+    "step-panel": 6,
 }
 
 

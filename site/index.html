@@ -66,7 +66,7 @@
       <nav class="rail" aria-label="Firmware setup workflow">
         <header class="rail-header">
           <span class="rail-eyebrow">Workflow</span>
-          <span class="rail-step-count">5 steps · ~3 min</span>
+          <span class="rail-step-count">6 steps · ~3 min</span>
         </header>
         <div class="step-list">
           <div class="step-item is-active" data-step="0">
@@ -88,6 +88,10 @@
           <div class="step-item" data-step="4">
             <span class="step-number">05</span>
             <span class="step-copy"><strong>Serial log</strong><small>Live diagnostics</small></span>
+          </div>
+          <div class="step-item" data-step="5">
+            <span class="step-number">06</span>
+            <span class="step-copy"><strong>Documentation</strong><small>Hardware info</small></span>
           </div>
         </div>
         <div class="rail-note">All credentials stay in this browser — never uploaded.</div>
@@ -363,6 +367,73 @@
               <li>Close the port in other tabs first</li>
               <li>Re-plug the tracker if no output</li>
               <li>Use clear to reset the buffer</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ============================== STEP 5: DOCUMENTATION ============================== -->
+        <section id="step-5" class="step-panel step-content hidden">
+          <header class="step-header">
+            <span class="section-kicker">Step 06 · Documentation</span>
+            <h2 class="step-title">Hardware overview &amp; reference</h2>
+            <p class="step-subtitle">
+              Informasi lengkap komponen internal tracker dan layout PCB SlimeVR-BMI160.
+            </p>
+          </header>
+
+          <div style="margin-bottom:2rem;">
+            <span class="section-kicker">Produk Jadi — Komponen Internal</span>
+            <div style="margin:1rem 0; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+              <img src="assets/slimeVR_real_5.jpeg" alt="Set tracker SlimeVR-BMI160 lengkap" style="width:100%; display:block;">
+            </div>
+            <p style="margin-bottom:0.8rem;">Setiap unit tracker terdiri dari komponen berikut:</p>
+            <ul class="check-list" style="margin-bottom:0;">
+              <li><strong>Casing 3D-Print</strong> — Enclosure kompak (FDM/resin), desain snap-fit dengan lubang USB-C dan slide switch</li>
+              <li><strong>PCB Utama</strong> — Board custom berukuran kompak yang memuat seluruh sirkuit elektronik</li>
+              <li><strong>ESP32-WROOM-32D</strong> — Mikrokontroler WiFi 802.11 b/g/n + BLE 4.2, dual-core 240 MHz</li>
+              <li><strong>BMI160 (IMU)</strong> — Sensor 6-axis (accelerometer + gyroscope), terpasang via header 7-pin (mudah diganti)</li>
+              <li><strong>Baterai Li-Ion / LiPo</strong> — Sumber daya wireless, konektor JST-PH 2-pin</li>
+              <li><strong>Port USB Type-C</strong> — Pengisian baterai dan flashing firmware</li>
+              <li><strong>Slide Switch (On/Off)</strong> — Saklar daya di sisi casing</li>
+              <li><strong>5 LED Indikator</strong> — Charging (biru), Standby/penuh (merah), ACK (merah, berkedip saat server aktif), TX/RX (serial)</li>
+              <li><strong>Elastic Strap</strong> — Tali elastis untuk pemasangan di tubuh</li>
+            </ul>
+            <p style="margin-top:0.8rem; font-size:0.9rem; color:var(--text-muted, #64748b);">
+              Full-body tracking membutuhkan <strong>5–7 unit</strong> tracker (minimal: paha kiri-kanan, betis kiri-kanan, dada/hip).
+            </p>
+          </div>
+
+          <div style="margin-bottom:2rem;">
+            <span class="section-kicker">Layout PCB &amp; Pinout</span>
+            <div style="margin:1rem 0; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+              <img src="assets/slimeVR_5.png" alt="PCB layout dan pinout SlimeVR-BMI160" style="width:100%; display:block;">
+            </div>
+            <p style="margin-bottom:0.8rem;">Bagian-bagian utama PCB:</p>
+            <ul class="check-list" style="margin-bottom:0;">
+              <li><strong>ESP32-WROOM-32D</strong> — Modul utama di tengah PCB, antena WiFi di ujung (jangan tutup dengan ground plane)</li>
+              <li><strong>FT231XS-R</strong> — IC USB-to-UART di dekat konektor USB-C, untuk flashing dan serial monitor</li>
+              <li><strong>TP4056</strong> — IC charger baterai Li-Ion (constant current/voltage)</li>
+              <li><strong>DW01A + FS8205A</strong> — Proteksi baterai: over-charge, over-discharge, overcurrent, short circuit</li>
+              <li><strong>M3406-ADJ</strong> — DC-DC step-down 3.7–4.2V → 3.3V untuk ESP32 dan sensor</li>
+              <li><strong>USB Type-C</strong> — Port input: pengisian daya + komunikasi serial</li>
+              <li><strong>Header IMU 7-pin</strong> — Socket modular untuk BMI160 (bisa dilepas/ganti tanpa solder)</li>
+              <li><strong>JST-PH 2-pin (P1)</strong> — Konektor baterai Li-Ion/LiPo</li>
+              <li><strong>JST-PH 4-pin (EXT)</strong> — Port I2C ekspansi untuk sensor tambahan</li>
+              <li><strong>Slide Switch</strong> — Saklar on/off yang memutus jalur daya baterai</li>
+              <li><strong>Tombol Reset</strong> — Reset manual ESP32</li>
+              <li><strong>5 LED SMD</strong> — CHRG, STBY, LED (ACK), TX, RX</li>
+              <li><strong>Q1, Q2 (MMBT3904)</strong> — Auto-reset ESP32 saat flashing via USB</li>
+              <li><strong>D1 (1N5819HW)</strong> — Dioda Schottky proteksi reverse polarity USB</li>
+            </ul>
+          </div>
+
+          <div>
+            <span class="section-kicker">Dokumentasi lengkap</span>
+            <ul class="check-list">
+              <li><a href="https://github.com/juarendra/SlimeVR-BMI160/blob/main/DOC/SOFTWARE_USAGE.pdf" target="_blank">Download PDF Dokumentasi Software</a></li>
+              <li><a href="https://github.com/juarendra/SlimeVR-BMI160/blob/main/DOC/BOM_SlimeVRDiyModular.csv" target="_blank">Bill of Materials (BOM)</a></li>
+              <li><a href="https://github.com/juarendra/SlimeVR-BMI160/blob/main/HARDWARE/dimension_SlimeVR.pdf" target="_blank">Dimensi PCB (PDF)</a></li>
+              <li><a href="https://github.com/juarendra/SlimeVR-BMI160" target="_blank">GitHub Repository</a></li>
             </ul>
           </div>
         </section>
