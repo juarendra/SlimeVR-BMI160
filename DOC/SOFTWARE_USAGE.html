@@ -37,6 +37,136 @@
         <span class="badge" style="background:#0f172a;">ESP32</span>
     </div>
 
+    <h2>🔩 Hardware Overview</h2>
+    <p>Berikut adalah gambaran lengkap hardware SlimeVR-BMI160 tracker, mulai dari desain PCB, casing 3D-print, hingga produk jadi yang siap digunakan.</p>
+
+    <h3>Komponen Utama</h3>
+    <table>
+        <thead>
+            <tr><th>Komponen</th><th>Spesifikasi</th><th>Fungsi</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>ESP32-WROOM-32D</strong></td><td>WiFi 802.11 b/g/n + Bluetooth 4.2, Dual-core 240 MHz</td><td>Mikrokontroler utama, mengirim data sensor via WiFi ke SlimeVR Server</td></tr>
+            <tr><td><strong>BMI160</strong></td><td>6-axis IMU (Accelerometer + Gyroscope), I2C 0x68</td><td>Sensor gerak untuk full-body tracking</td></tr>
+            <tr><td><strong>TP4056</strong></td><td>Li-Ion charger, constant current/voltage</td><td>Mengisi baterai Li-Ion via USB-C</td></tr>
+            <tr><td><strong>DW01A + FS8205A</strong></td><td>Battery protection IC + Dual MOSFET</td><td>Proteksi baterai dari over-charge, over-discharge, dan short circuit</td></tr>
+            <tr><td><strong>M3406-ADJ</strong></td><td>Step-down DC-DC converter, SOT-23-5</td><td>Regulasi tegangan dari baterai ke 3.3V untuk ESP32</td></tr>
+            <tr><td><strong>FT231XS-R</strong></td><td>USB-to-UART bridge, SSOP-20</td><td>Konversi USB ke serial untuk flashing firmware dan debugging</td></tr>
+            <tr><td><strong>USB Type-C</strong></td><td>TYPE-C-31-M-12 receptacle</td><td>Port pengisian dan flashing firmware</td></tr>
+            <tr><td><strong>Slide Switch</strong></td><td>JS102011SAQN, SPDT</td><td>Saklar on/off baterai</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Desain PCB</h3>
+    <p>PCB menggunakan desain modular — sensor BMI160 terhubung via header 7-pin sehingga mudah diganti atau di-upgrade. Konektor JST-PH untuk baterai (2-pin) dan ekstensi sensor (4-pin).</p>
+    <div class="step-grid">
+        <div class="step-card">
+            <strong>PCB Layout — Tampak Atas (Top Layer)</strong>
+            <img src="slimeVR_1.png" alt="PCB tampak atas" style="width:100%;border-radius:12px;">
+            <p>Penempatan komponen utama: ESP32 WROOM, FT231XS USB-UART, TP4056 charger, dan konektor USB-C di sisi atas PCB.</p>
+        </div>
+        <div class="step-card">
+            <strong>PCB Layout — Tampak Bawah (Bottom Layer)</strong>
+            <img src="slimeVR_2.png" alt="PCB tampak bawah" style="width:100%;border-radius:12px;">
+            <p>Routing sinyal dan ground plane di sisi bawah. Komponen pasif (resistor, kapasitor) tersebar di kedua sisi.</p>
+        </div>
+        <div class="step-card">
+            <strong>PCB 3D Render — Perspektif Atas</strong>
+            <img src="slimeVR_3.png" alt="PCB 3D render atas" style="width:100%;border-radius:12px;">
+            <p>Render 3D menunjukkan posisi header IMU (7-pin), konektor baterai JST-PH (2-pin), dan slide switch on/off.</p>
+        </div>
+        <div class="step-card">
+            <strong>PCB 3D Render — Perspektif Bawah</strong>
+            <img src="slimeVR_4.png" alt="PCB 3D render bawah" style="width:100%;border-radius:12px;">
+            <p>Tampilan sisi bawah PCB dengan komponen SMD dan jalur ground plane.</p>
+        </div>
+        <div class="step-card">
+            <strong>PCB Dimensi & Pinout</strong>
+            <img src="slimeVR_5.png" alt="PCB dimensi" style="width:100%;border-radius:12px;">
+            <p>Dimensi board dan layout pin untuk referensi pemasangan dalam casing.</p>
+        </div>
+    </div>
+
+    <h3>Casing 3D-Print</h3>
+    <p>Casing dirancang untuk 3D printing (FDM/resin). Desain snap-fit sehingga mudah dibuka-tutup tanpa sekrup.</p>
+    <div class="step-grid">
+        <div class="step-card">
+            <strong>Casing — Tampak Isometrik</strong>
+            <img src="slimeVR_case_1.png" alt="Casing isometrik" style="width:100%;border-radius:12px;">
+            <p>Desain kompak dengan lubang untuk USB-C, slide switch, dan ventilasi.</p>
+        </div>
+        <div class="step-card">
+            <strong>Casing — Tampak Atas</strong>
+            <img src="slimeVR_case_2.png" alt="Casing tampak atas" style="width:100%;border-radius:12px;">
+            <p>Permukaan atas rata, cocok untuk ditempel pada strap elastic band.</p>
+        </div>
+        <div class="step-card">
+            <strong>Casing — Tampak Samping & Belakang</strong>
+            <img src="slimeVR_case_3.png" alt="Casing tampak samping" style="width:100%;border-radius:12px;">
+            <p>Profil tipis, ketebalan keseluruhan minimal untuk kenyamanan saat dipakai di tubuh.</p>
+        </div>
+        <div class="step-card">
+            <strong>Casing — Detail Sambungan</strong>
+            <img src="slimeVR_case_4.png" alt="Casing detail sambungan" style="width:100%;border-radius:12px;">
+            <p>Mekanisme snap-fit antara bagian atas dan bawah casing.</p>
+        </div>
+        <div class="step-card">
+            <strong>Casing — Tampak Bawah</strong>
+            <img src="slimeVR_case_5.png" alt="Casing tampak bawah" style="width:100%;border-radius:12px;">
+            <p>Slot untuk PCB dan space baterai Li-Ion di bagian bawah.</p>
+        </div>
+        <div class="step-card">
+            <strong>Casing — Tampilan Lengkap</strong>
+            <img src="slimeVR_case_6.png" alt="Casing tampilan lengkap" style="width:100%;border-radius:12px;">
+            <p>Tampilan keseluruhan casing dari berbagai sudut.</p>
+        </div>
+    </div>
+
+    <h3>Foto PCB Terpasang</h3>
+    <p>PCB setelah di-solder dengan semua komponen SMD terpasang.</p>
+    <div class="step-grid">
+        <div class="step-card">
+            <strong>PCB Assembled — Tampak Atas</strong>
+            <img src="slimeVR_pcb_1.jpeg" alt="Foto PCB tampak atas" style="width:100%;border-radius:12px;">
+            <p>PCB dengan ESP32, FT231XS, TP4056, dan komponen pasif sudah terpasang. Header IMU siap dipasang modul BMI160.</p>
+        </div>
+        <div class="step-card">
+            <strong>PCB Assembled — Tampak Bawah</strong>
+            <img src="slimeVR_pcb_2.jpeg" alt="Foto PCB tampak bawah" style="width:100%;border-radius:12px;">
+            <p>Sisi bawah PCB menunjukkan kualitas soldering komponen SMD.</p>
+        </div>
+    </div>
+
+    <h3>Produk Jadi (Finished Product)</h3>
+    <p>Tracker yang sudah dirakit lengkap — PCB + baterai di dalam casing 3D-print, siap digunakan untuk full-body tracking.</p>
+    <div class="step-grid">
+        <div class="step-card">
+            <strong>Tracker Jadi — Tampak Depan</strong>
+            <img src="slimeVR_real_1.jpeg" alt="Tracker tampak depan" style="width:100%;border-radius:12px;">
+            <p>Tracker dalam casing dengan port USB-C terlihat, siap untuk charging dan flashing.</p>
+        </div>
+        <div class="step-card">
+            <strong>Tracker Jadi — Tampak Samping</strong>
+            <img src="slimeVR_real_2.jpeg" alt="Tracker tampak samping" style="width:100%;border-radius:12px;">
+            <p>Profil tipis tracker, menunjukkan slide switch on/off di sisi samping.</p>
+        </div>
+        <div class="step-card">
+            <strong>Tracker Jadi — Detail Atas</strong>
+            <img src="slimeVR_real_3.jpeg" alt="Tracker detail atas" style="width:100%;border-radius:12px;">
+            <p>Tampak atas tracker dalam casing — permukaan rata untuk penempatan strap.</p>
+        </div>
+        <div class="step-card">
+            <strong>Tracker Jadi — Dalam Casing (Terbuka)</strong>
+            <img src="slimeVR_real_4.jpeg" alt="Tracker casing terbuka" style="width:100%;border-radius:12px;">
+            <p>Bagian dalam tracker menunjukkan PCB dan baterai Li-Ion yang terpasang rapi.</p>
+        </div>
+        <div class="step-card">
+            <strong>Set Tracker Lengkap</strong>
+            <img src="slimeVR_real_5.jpeg" alt="Set tracker lengkap" style="width:100%;border-radius:12px;">
+            <p>Beberapa tracker siap pakai — untuk full-body tracking dibutuhkan 5-7 unit (tergantung titik tracking yang diinginkan).</p>
+        </div>
+    </div>
+
     <h2>🎯 Pendahuluan</h2>
     <p>Tracker SlimeVR-BMI160 adalah perangkat full-body tracking DIY berbasis ESP32 dan sensor BMI160. Dokumentasi ini memandu Anda melalui dua metode utama:</p>
     <ul style="margin:0.5rem 0 1.5rem 1.5rem;">
