@@ -1,128 +1,101 @@
 # SlimeVR-BMI160 DIY Tracker
 
-Repositori ini berisi semua file yang dibutuhkan untuk membuat hardware DIY (Do It Yourself) untuk [SlimeVR](https://www.slimevr.dev/), sebuah sistem _full-body tracking_ open-source untuk VR.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/release/juarendra/SlimeVR-BMI160.svg)](https://github.com/juarendra/SlimeVR-BMI160/releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/juarendra/SlimeVR-BMI160.svg)](https://github.com/juarendra/SlimeVR-BMI160/commits/main)
 
-Project ini, oleh [Positron Electronik](https://www.tokopedia.com/positronelectronic?source=universe&st=product), merupakan modifikasi dari desain SlimeVR original. Perbedaan utamanya adalah penggunaan sensor IMU **BMI160** yang lebih terjangkau dibandingkan BNO085, serta penggunaan mikrokontroler **ESP32** yang sudah dilengkapi WiFi dan Bluetooth.
+**SlimeVR-BMI160** adalah proyek tracker full-body DIY (Do It Yourself) berbasis ESP32 dan sensor IMU BMI160, dikembangkan oleh [Positron Electronik](https://www.tokopedia.com/positronelectronic). Solusi ini merupakan alternatif hemat biaya dari tracker SlimeVR original, dengan tetap mempertahankan performa tinggi untuk pengalaman VR yang imersif.
 
 <p align="center">
   <img src="DOC/slimeVR_real_5.jpeg" width="400">
 </p>
 
-## Fitur Unggulan
-- **Mikrokontroler**: ESP32 WROOM
-- **Konektivitas**: WiFi & Bluetooth Low Energy
-- **Sensor IMU**: BMI-160 (dengan header, sehingga mudah diganti)
-- **Manajemen Daya**:
-    - Input daya via USB-C atau baterai LiPo 1s.
-    - Sirkuit charger baterai (TP4056) dengan proteksi (DW01A).
-- **Konektor Eksternal**: Port I2C tambahan untuk ekspansi.
-- **Indikator LED**: Terdapat 5 buah LED dengan fungsi sebagai berikut:
-    - **LED 1 (Biru)**: Indikator pengisian daya (menyala saat baterai sedang diisi).
-    - **LED 2 (Merah)**: Indikator baterai penuh (menyala saat pengisian selesai).
-    - **LED 3 (Merah)**: Indikator ACK, berkedip saat tracker menerima konfirmasi (acknowledgment) bahwa slimevr sedang running.
-    - **LED 4 & 5 (Merah/Biru)**: Indikator Serial (TX/RX), akan menyala atau berkedip saat proses flashing firmware.
-- **Tombol & Saklar**: Tombol Reset dan Saklar On/Off.
+## ⚡ Fitur Unggulan
+- **Mikrokontroler**: ESP32-WROOM-32 (WiFi + BLE)
+- **Sensor IMU**: BMI160 (header socket, mudah diganti)
+- **Manajemen Daya**: USB-C atau LiPo 1S, charger TP4056 + proteksi DW01A
+- **Konektor I2C**: Port ekspansi untuk sensor tambahan
+- **LED Indikator**: 5 LED untuk status pengisian, koneksi, dan serial
+- **Tombol**: Reset & power switch
 
----
+## 🚀 Cara Penggunaan
 
-## Panduan Penggunaan dan Konfigurasi
+### 📦 Isi Paket (untuk produk jadi)
+- 1 Unit tracker SlimeVR-BMI160
+- 1 Baterai LiPo (terpasang)
 
-### 1. Isi Paket (Untuk Produk Jadi)
-- 1x Unit Tracker SlimeVR-BMI160
-- 1x Baterai LiPo (sudah terpasang)\
+### 🔋 Pengisian Daya
+- Colokkan USB-C: LED **biru** menyala saat mengisi, **merah** saat penuh.
 
-### 2. Pengisian Daya
-Sebelum penggunaan, isi daya tracker menggunakan kabel USB-C.
-- Lampu **biru** akan menyala saat pengisian berlangsung.
-- Lampu **merah** akan menyala jika baterai sudah penuh.
-
-### 3. Flash & Konfigurasi Wi-Fi
-
-Kini tersedia **Web Installer (Mudah, Tanpa Install Software)**:
-1. Buka [SlimeVR BMI160 Web Installer](https://juarendra.github.io/SlimeVR-BMI160/) di Chrome / Edge (PC).
+### 🌐 Flash & Konfigurasi WiFi (Metode Termudah)
+Gunakan **Web Installer** tanpa instalasi software:
+1. Buka [SlimeVR BMI160 Web Installer](https://juarendra.github.io/SlimeVR-BMI160/) di Chrome/Edge (PC).
 2. Hubungkan tracker via USB.
-3. Klik **Install Firmware** lalu masukkan SSID & Password Wi-Fi via form web.
+3. Klik **Install Firmware**, lalu masukkan SSID & Password WiFi.
+4. Tunggu hingga proses selesai dan tracker terhubung ke server SlimeVR.
 
-Untuk metode manual / development menggunakan VS Code & PlatformIO, ikuti panduan firmware:
+> **Catatan**: Web Installer menggunakan Web Serial, jadi pastikan browser mendukung (Chrome/Edge).
 
-### **➡️ [Klik di sini untuk Panduan Manual Flashing](./FIRMWARE/README.md)**
+### 🛠️ Metode Manual (untuk Developer)
+Jika Anda ingin mengembangkan atau mengompilasi firmware sendiri, ikuti panduan lengkap di:
+➡️ **[Panduan Flashing Manual](./FIRMWARE/README.md)**
 
-### 4. Pemecahan Masalah Umum
-- **Tracker tidak muncul di server SlimeVR.**
-    - **Penyebab paling umum:** Pastikan Anda telah memasukkan SSID dan Password Wi-Fi **dengan benar** di dalam file konfigurasi (`platformio.ini`) sebelum melakukan flashing, sesuai dengan panduan di atas.
-    - Pastikan PC dan tracker berada di jaringan Wi-Fi yang sama.
-    - Pastikan saklar tracker sudah dalam posisi ON dan baterai terisi.
-    - Coba restart tracker dan aplikasi SlimeVR Server di PC Anda.
+## 📂 Struktur Repositori
+| Direktori | Isi |
+|-----------|-----|
+| `/PCB` | Desain PCB (EAGLE) dan file Gerber |
+| `/HARDWARE` | Model 3D case (STL) dan dimensi |
+| `/FIRMWARE` | Source code firmware (PlatformIO) dan file .bin compiled |
+| `/site` | Web Installer (HTML, CSS, JS, manifest) |
+| `/DOC` | Dokumentasi, gambar, BOM, datasheet |
+| `/scripts` | Script otomatisasi (QA, release) |
 
-- **Lampu LED tidak menyala sama sekali.**
-    - Pastikan saklar sudah di posisi ON.
-    - Sambungkan tracker ke charger USB-C untuk memastikan baterai tidak habis total. Jika lampu charger menyala, biarkan terisi daya selama beberapa saat sebelum mencoba lagi.
+## 🔧 Untuk Pengembang (DIY)
+Jika Anda ingin merakit sendiri:
+1. **Rakit Hardware**: Gunakan file PCB dari `/PCB/CAD-CAM`, BOM dari `/DOC/BOM_SlimeVRDiyModular.csv`, dan case 3D dari `/HARDWARE/case`.
+2. **Flash Firmware**: Ikuti panduan di `/FIRMWARE/README.md`.
+3. **Verifikasi**: Gunakan serial monitor untuk memastikan koneksi WiFi dan sensor.
 
----
+## 🐛 Pemecahan Masalah Umum
+- **Tracker tidak muncul di server**: Pastikan SSID/password benar, PC dan tracker satu jaringan, saklar ON.
+- **LED mati total**: Cek saklar, charge baterai via USB-C.
 
-## Untuk Pengembang (DIY)
-
-Bagian ini ditujukan untuk Anda yang ingin merakit atau memodifikasi tracker dari awal.
-
-## Isi Repositori
-Berikut adalah penjelasan singkat mengenai isi dari setiap direktori utama:
-- **`/PCB`**: Berisi file desain PCB (skematik dan layout) dalam format Eagle serta file produksi (Gerber) yang siap dikirim ke pabrikan PCB.
-- **`/HARDWARE`**: Berisi file CAD dan model 3D untuk case/casing tracker, termasuk file `.stl` yang siap untuk di-print 3D.
-- **`/FIRMWARE`**: Berisi source code firmware untuk ESP32 (berbasis PlatformIO) dan file `.bin` yang sudah dicompile. **Panduan flashing ada di sini.**
-- **`/DOC`**: Berisi dokumentasi pendukung seperti gambar, diagram pinout, Bill of Materials (BOM), dan datasheet.
-
----
-
-## Langkah-Langkah Memulai
-
-Untuk membangun tracker Anda sendiri, berikut adalah langkah-langkah utamanya:
-
-### 1. Rakit Hardware
-Anda perlu membuat PCB dan menyolder semua komponen.
-- **File PCB**: Gunakan file Gerber dari direktori **[`/PCB/CAD-CAM`](./PCB/CAD-CAM)**.
-- **Daftar Komponen (BOM)**: Daftar lengkap komponen yang dibutuhkan ada di **[`/DOC/BOM_SlimeVRDiyModular.csv`](./DOC/BOM_SlimeVRDiyModular.csv)**.
-- **Case 3D Print**: File untuk mencetak case tersedia di direktori **[`/HARDWARE/case`](./HARDWARE/case)**.
-
-### 2. Flash Firmware
-Setelah hardware siap, langkah selanjutnya adalah memasang firmware ke ESP32.
-
-### **➡️ [Klik di sini untuk Panduan Flashing Lengkap](./FIRMWARE/README.md)**
-
-Panduan tersebut mencakup semua langkah yang diperlukan, mulai dari instalasi VS Code & PlatformIO, konfigurasi WiFi, hingga proses flashing dan verifikasi melalui serial monitor.
-
----
+## 📖 Dokumentasi Lengkap
+- [Dokumentasi Software (PDF)](./DOC/SOFTWARE_USAGE.pdf) — panduan detail penggunaan web installer dan manual.
 
 <details>
-<summary><strong>Tampilkan Detail Teknis dan Galeri Hardware</strong></summary>
+<summary><strong>📐 Detail Teknis dan Galeri</strong></summary>
 
-### Spesifikasi Teknis
+| Fitur | Komponen |
+|-------|----------|
+| Mikrokontroler | ESP32-WROOM-32 |
+| Sensor IMU | BMI160 |
+| USB-to-Serial | FTDI FT231XS |
+| Charger | TP4056 |
+| Proteksi Baterai | DW01A + FS8205A |
+| Regulator | M3406 (3.3V 800mA) |
 
-| Fitur               | Komponen Digunakan   |
-| ------------------- | -------------------- |
-| Microcontroller     | ESP32-WROOM-32       |
-| Sensor IMU          | BMI-160              |
-| IC USB to Serial    | FTDI FT231XS         |
-| IC Charger Baterai  | TP4056               |
-| IC Proteksi Baterai | DW01A & FS8205A      |
-| Regulator Utama     | M3406 (3.3V 800mA)   |
-
-### Diagram Pinout
+**Diagram Pinout**:
 <p align="center">
   <img src="DOC/slimeVR_5.png" width="60%">
 </p>
 
-### Dimensi Board
-- [PDF Dimensi Board](https://github.com/juarendra/SlimeVR-BMI160/blob/main/HARDWARE/dimension_SlimeVR.pdf)
+**Dimensi Board**: [PDF](https://github.com/juarendra/SlimeVR-BMI160/blob/main/HARDWARE/dimension_SlimeVR.pdf)
 
-### Galeri
+**Galeri**:
 <p align="center">
   <img src="DOC/slimeVR_pcb_2.jpeg" width="45%">
   <img src="DOC/slimeVR_case_1.png" width="45%">
   <img src="DOC/slimeVR_real_1.jpeg" width="45%">
   <img src="DOC/slimeVR_real_3.jpeg" width="45%">
 </p>
-
 </details>
 
-## FAQ
-_(Bagian ini dapat diisi dengan pertanyaan yang sering muncul di kemudian hari)._
+## ❓ FAQ
+*Segera hadir.*
+
+## 🤝 Kontribusi
+Pull request dan saran sangat diterima! Silakan buka issue di GitHub.
+
+## 📜 Lisensi
+MIT License © 2024 Positron Electronik
